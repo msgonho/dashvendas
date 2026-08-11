@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Vendas — Comissões</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230F1115'/%3E%3Cpath d='M6 22 L13 14 L18 18 L26 8' stroke='%23D4AF37' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='8' r='2.6' fill='%233DDC97'/%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0F1115; --surface:#171B22; --surface-2:#1E232C; --border:#2A2F3A;
+    --text:#E9E7E2; --text-muted:#8B93A1; --gold:#D4AF37; --teal:#3DDC97; --coral:#FF6B5E;
+    --mono:'JetBrains Mono','SF Mono','Consolas',monospace;
+    --sans:-apple-system,'Segoe UI',Inter,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;overflow-x:hidden;}
+  body{
+    background:
+      radial-gradient(1100px 550px at 12% -8%, rgba(212,175,55,.10), transparent 60%),
+      radial-gradient(900px 500px at 92% 4%, rgba(61,220,151,.07), transparent 60%),
+      var(--bg);
+    color:var(--text);font-family:var(--sans);padding:20px;min-height:100vh;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 4px;}
+  h1{font-family:var(--mono);font-size:26px;font-weight:700;margin:0 0 2px;letter-spacing:-.01em;}
+  .period-line{color:var(--text-muted);font-size:13px;margin:0 0 18px;}
+  .period-line button{background:none;border:1px solid var(--border);color:var(--gold);font-family:var(--sans);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;margin-left:8px;}
+  .period-line button:hover{border-color:var(--gold);background:rgba(212,175,55,.1);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 6px 24px rgba(0,0,0,.3);}
+
+  .hero-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;}
+  .hero-number{font-family:var(--mono);font-size:44px;font-weight:700;color:var(--gold);line-height:1.05;margin:0;word-break:break-word;}
+  .hero-sub{color:var(--text-muted);font-size:13px;margin:6px 0 14px;}
+  .min-note{font-size:12px;color:var(--text-muted);margin:0 0 14px;}
+  .min-note.met{color:var(--teal);}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.03em;margin-bottom:14px;margin-right:8px;}
+  .pill.ahead{background:rgba(61,220,151,.15);color:var(--teal);}
+  .pill.behind{background:rgba(255,107,94,.15);color:var(--coral);}
+  .pill.done{background:rgba(212,175,55,.18);color:var(--gold);}
+
+  .gauge-track{position:relative;height:8px;background:var(--surface-2);border-radius:6px;overflow:visible;margin:6px 0 22px;opacity:.85;}
+  .tip-label{position:absolute;font-family:var(--mono);font-size:10px;white-space:nowrap;left:0;}
+  .tip-label.above{top:-17px;color:var(--text-muted);}
+  .tip-label.below{bottom:-17px;color:var(--gold);font-weight:700;}
+  .gauge-fill{height:100%;border-radius:8px;transition:width .3s;}
+  .gauge-marker{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);opacity:.7;}
+  .gauge-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);font-family:var(--mono);}
+  .ritmo-line{font-size:13px;color:var(--text-muted);margin-top:14px;}
+  .ritmo-line b{color:var(--text);font-family:var(--mono);}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:17px 16px 14px;position:relative;overflow:hidden;transition:transform .2s, box-shadow .2s;}
+  .stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border);}
+  .stat:has(.value.teal)::before{background:var(--teal);}
+  .stat:has(.value.coral)::before{background:var(--coral);}
+  .stat:has(.value.gold)::before{background:var(--gold);}
+  .stat:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.35);}
+  .stat .label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+  .stat .value{font-family:var(--mono);font-size:20px;font-weight:700;}
+  .stat .value.teal{color:var(--teal);}
+  .stat .value.coral{color:var(--coral);}
+  .stat .value.gold{color:var(--gold);}
+
+  h2.section-title{font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:28px 0 6px;}
+  .section-desc{font-size:12px;color:var(--text-muted);margin:0 0 16px;line-height:1.5;}
+
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:520px){.settings-grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
+  .field input{width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);-webkit-text-fill-color:var(--text);caret-color:var(--text);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:14px;}
+  .field input:focus{outline:none;border-color:var(--gold);}
+  input[type=color]{width:100%;height:38px;padding:2px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;cursor:pointer;}
+  .field input:disabled{color:var(--text-muted);opacity:.7;}
+  .field-note{font-size:11px;color:var(--text-muted);margin-top:4px;}
+  .input-wrap{position:relative;}
+  .input-wrap .prefix,.input-wrap .suffix{position:absolute;top:0;bottom:0;display:flex;align-items:center;font-family:var(--mono);font-size:13px;color:var(--text-muted);pointer-events:none;}
+  .edit-wrap .edit-ic{position:absolute;top:0;bottom:0;right:12px;display:flex;align-items:center;color:var(--text-muted);opacity:.5;pointer-events:none;font-size:14px;transition:opacity .2s;}
+  .edit-wrap:hover .edit-ic, .edit-wrap input:focus ~ .edit-ic{opacity:.9;color:var(--gold);}
+  .input-wrap .prefix{left:10px;}
+  .input-wrap .suffix{right:10px;}
+  .input-wrap.money input{padding-left:34px;}
+  .input-wrap.percent input{padding-right:28px;}
+  .btn-row{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;border:none;cursor:pointer;}
+  .btn.primary{background:var(--gold);color:#1a1400;}
+  .btn.primary:hover{background:#e0bd45;}
+  .btn:disabled{opacity:.55;cursor:default;}
+  .flash{animation:flashPulse .9s ease;}
+  @keyframes flashPulse{0%{box-shadow:0 0 0 2px var(--gold);}100%{box-shadow:0 6px 24px rgba(0,0,0,.3);}}
+  .btn.ghost{background:none;border:1px solid var(--border);color:var(--text-muted);}
+  .btn.ghost:hover{border-color:var(--coral);color:var(--coral);}
+
+  .values-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:0;}
+  @media (max-width:520px){.values-grid{grid-template-columns:1fr;}}
+  .value-field{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:16px;}
+  .value-field.pago{border-left:3px solid var(--teal);}
+  .value-field.apagar{border-left:3px solid var(--coral);}
+  .value-field label{margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .value-icon{font-size:12px;}
+  .value-field.pago .value-icon{color:var(--teal);}
+  .value-field.apagar .value-icon{color:var(--coral);}
+  .value-field .input-wrap input{
+    width:100%;box-sizing:border-box;
+    font-family:var(--mono);font-weight:700;font-size:23px;
+    background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:10px 30px 10px 36px;
+    transition:border-color .2s, background-color .2s;
+  }
+  .value-field.pago .input-wrap input{color:var(--teal);}
+  .value-field.apagar .input-wrap input{color:var(--coral);}
+  .value-field .input-wrap input:hover{border-color:var(--text-muted);}
+  .value-field .input-wrap input:focus{border-color:currentColor;background:var(--surface-2);}
+  .value-field .input-wrap .prefix{opacity:.6;font-size:14px;font-family:var(--mono);}
+  .value-field .field-note{margin:8px 0 0;}
+
+  .split-bar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:18px;background:var(--surface-2);}
+  .split-seg{transition:width .3s;}
+  .split-seg.pago{background:var(--teal);}
+  .split-seg.apagar{background:var(--coral);}
+  .split-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-top:9px;flex-wrap:wrap;gap:8px;font-family:var(--mono);}
+  .split-labels .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+  .dot.teal{background:var(--teal);}
+  .dot.coral{background:var(--coral);}
+  .update-row{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .update-row .field-note{margin:0;}
+  .commission-footer{
+    margin-top:16px;padding-top:14px;border-top:1px dashed var(--border);
+    font-size:13px;color:var(--text-muted);
+  }
+  .commission-footer .cf-main{margin:0 0 5px;}
+  .commission-footer .cf-sub{margin:0;font-size:11px;color:var(--text-muted);opacity:.75;}
+  .commission-footer b{color:var(--gold);font-family:var(--mono);font-size:15px;}
+
+  /* CALENDAR */
+  .calendar-block{margin-top:18px;}
+  .calendar-block .field-note{margin-bottom:10px;}
+  .cal-month-label{font-family:var(--mono);font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px;}
+  summary.cal-month-label{cursor:pointer;list-style:none;}
+  summary.cal-month-label::-webkit-details-marker{display:none;}
+  summary.cal-month-label::before{content:'▸ ';color:var(--gold);}
+  details[open] > summary.cal-month-label::before{content:'▾ ';}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-wd{font-size:10px;color:var(--text-muted);text-align:center;padding:2px 0;}
+  .cal-day{
+    height:32px;display:flex;align-items:center;justify-content:center;
+    border-radius:7px;font-family:var(--mono);font-size:12px;cursor:pointer;
+    background:var(--surface-2);border:1px solid transparent;color:var(--text);
+    padding:0;margin:0;
+  }
+  .cal-day.out{background:transparent;color:#3A414D;cursor:default;}
+  .cal-day:not(.out):hover{border-color:var(--gold);}
+  .cal-day.off{background:rgba(255,107,94,.12);color:var(--coral);text-decoration:line-through;}
+  .cal-day.today{border-color:var(--gold);}
+  .cal-legend{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;}
+  .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .cal-legend .dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  .cal-legend .dot.work{background:var(--surface-2);border:1px solid var(--border);}
+  .cal-legend .dot.off{background:rgba(255,107,94,.4);}
+
+  #settingsPanel{display:none;}
+  #settingsPanel.open{display:block;}
+  .chart-wrap{position:relative;height:250px;}
+  .chart-empty{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;color:var(--text-muted);font-size:12px;padding:0 30px;
+  }
+
+  .btn-danger-link{
+    background:none;border:none;color:var(--text-muted);font-size:11px;
+    text-decoration:underline;text-decoration-color:transparent;
+    margin:14px 0 0;padding:2px 0;cursor:pointer;display:block;
+    transition:color .2s, text-decoration-color .2s;font-family:var(--sans);
+  }
+  .btn-danger-link:hover{color:var(--coral);text-decoration-color:var(--coral);}
+
+  .skeleton{padding:6px 0 20px;}
+  .skel-block{background:var(--surface-2);border-radius:10px;animation:skelPulse 1.4s ease-in-out infinite;}
+  @keyframes skelPulse{0%,100%{opacity:.45;}50%{opacity:.9;}}
+  .skel-donut{width:180px;height:180px;border-radius:50%;margin:10px auto 20px;}
+  .skel-line{height:14px;margin:0 auto 20px;}
+  .skel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;}
+  .skel-stat{height:64px;}
+
+  #emptyHint{font-size:13px;color:var(--text-muted);line-height:1.5;}
+  #emptyHint b{color:var(--text);}
+
+  .periodo-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);flex-wrap:wrap;}
+  .periodo-row:last-child{border-bottom:none;}
+  .periodo-row.recent{background:rgba(212,175,55,.05);border-radius:6px;padding:8px 8px;margin:0 -8px;}
+  .periodo-row .valores{font-family:var(--mono);color:var(--text);display:inline-flex;align-items:center;gap:6px;}
+  .periodo-row .status.ok{color:var(--teal);}
+  .periodo-row .status.no{color:var(--coral);}
+  .del-periodo{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;padding:0 2px;}
+  .del-periodo:hover{color:var(--coral);}
+
+  input[type=number]{-moz-appearance:textfield;}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+  .color-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);margin:0 0 18px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+  .color-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .color-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+  .hero-top{text-align:center;margin-bottom:16px;}
+  .donut-wrap{position:relative;width:min(220px, 78vw);height:min(220px, 78vw);margin:0 auto 8px;}
+  .donut-svg{width:100%;height:100%;display:block;}
+  .donut-bg-outer{fill:none;stroke:var(--surface-2);stroke-width:5;}
+  .donut-fill-outer{fill:none;stroke:var(--text-muted);stroke-width:5;stroke-linecap:round;opacity:.6;transition:stroke-dashoffset .4s ease;}
+  .donut-bg{fill:none;stroke:var(--surface-2);stroke-width:18;}
+  .donut-fill{fill:none;stroke-width:18;stroke-linecap:round;transition:stroke-dashoffset .4s ease, stroke .4s;}
+  .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 18%;}
+  .donut-center .hero-label{margin:0 0 7px;font-size:clamp(10px,3vw,12px);}
+  .donut-center .hero-number{font-size:clamp(14px,4.8vw,18px);white-space:nowrap;}
+  .donut-caption{font-size:10px;color:var(--text-muted);margin:0 0 16px;display:flex;justify-content:center;gap:14px;font-family:var(--mono);}
+  .donut-caption span{display:inline-flex;align-items:center;gap:5px;}
+  .donut-caption .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .ritmo-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:20px 0 24px;display:flex;align-items:center;gap:6px;}
+
+  .ic{display:inline-block;font-style:normal;}
+  h2.section-title .ic, h3 .ic{margin-right:2px;}
+
+  .card.highlight{border-color:var(--gold);}
+  .hero-number-sm{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--gold);margin:6px 0 0;}
+
+  .status-banner{display:none;font-size:13px;padding:10px 14px;border-radius:8px;margin:0 0 14px;border:1px solid var(--border);}
+  .status-banner.show{display:block;}
+  .status-banner.success{color:var(--teal);border-color:var(--teal);background:rgba(61,220,151,.08);}
+  .status-banner.error{color:var(--coral);border-color:var(--coral);background:rgba(255,107,94,.08);}
+
+  /* CORREÇÕES DE RESPONSIVIDADE */
+  .stat .label, .split-labels span, .donut-caption span, .update-row, .periodo-row,
+  .color-legend span, .gauge-labels span, .commission-footer, .period-line{
+    min-width:0;overflow-wrap:break-word;
+  }
+  .split-labels, .donut-caption, .color-legend{row-gap:6px;}
+  h2.section-title[style*="flex"]{flex-wrap:wrap;row-gap:8px;}
+  img, svg{max-width:100%;}
+  @media (max-width:420px){
+    body{padding:14px;}
+    .card{padding:16px;}
+    .hero-number{font-size:36px;}
+  }
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  @media (min-width:1100px){
+    .wrap{max-width:1080px;}
+    .stats-grid{grid-template-columns:repeat(auto-fit,minmax(150px,190px));}
+  }
+
+  .share-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;overflow:auto;}
+  .share-modal-inner{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .share-card{
+    width:380px;padding:0 0 28px;border-radius:22px;box-sizing:border-box;overflow:hidden;
+    background:var(--surface);border:1px solid var(--border);
+    text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);
+  }
+  .share-topbar{height:6px;background:var(--gold);}
+  .share-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin:22px 0 3px;}
+  .share-brand-name{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);}
+  .share-period{font-size:12px;color:var(--text-muted);margin-bottom:22px;font-family:var(--mono);}
+  .share-ring-wrap{position:relative;width:208px;height:208px;margin:0 auto 14px;}
+  .share-ring-svg{width:100%;height:100%;display:block;}
+  .share-ring-bg-outer{fill:none;stroke:var(--surface-2);stroke-width:5;}
+  .share-ring-fill-outer{fill:none;stroke:var(--text-muted);stroke-width:5;stroke-linecap:round;opacity:.55;}
+  .share-ring-bg{fill:none;stroke:var(--surface-2);stroke-width:16;}
+  .share-ring-fill{fill:none;stroke-width:16;stroke-linecap:round;}
+  .share-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .share-pct{font-family:var(--mono);font-size:42px;font-weight:700;color:var(--gold);}
+  .share-pct-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+  .share-pace-pill{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 16px;border-radius:20px;margin-bottom:22px;}
+  .share-stats{display:flex;justify-content:center;gap:12px;margin:0 26px 18px;}
+  .share-chip{flex:1;background:var(--surface-2);border-radius:12px;padding:12px 8px;border-left:3px solid var(--border);text-align:left;}
+  .share-chip.teal{border-left-color:var(--teal);}
+  .share-stat-label{display:block;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+  .share-stat-value{display:block;font-family:var(--mono);font-weight:700;font-size:17px;}
+  .share-highlight{margin:0 26px;padding:12px 14px;border-radius:12px;background:rgba(212,175,55,.1);color:var(--text);font-size:13px;font-weight:600;}
+  .share-highlight b{font-family:var(--mono);color:var(--gold);}
+  .share-footer{font-size:10px;color:var(--text-muted);opacity:.5;font-family:var(--mono);margin-top:18px;}
+  .share-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+
+  .unsaved-badge{color:var(--coral);font-weight:600;font-size:10px;}
+  .copy-flash{color:var(--teal);font-size:11px;margin-left:6px;display:none;}
+  .copy-flash.show{display:inline;}
+  body.compact-mode .color-legend{display:none;}
+  body.compact-mode #app > *:not(#heroCard){display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Acompanhamento de comissão</p>
+  <h1>Painel de Vendas</h1>
+  <p class="field-note" style="margin:2px 0 14px;">☁ Salvo automaticamente aqui no Claude — abra esta mesma conversa em qualquer aparelho pra ver os mesmos dados.</p>
+  <div class="status-banner" id="statusBanner" aria-live="polite" role="status"></div>
+  <p class="period-line" id="periodLine">Carregando período...
+    <button id="toggleSettingsBtn" type="button">Definir minha meta</button>
+  </p>
+
+  <div class="color-legend">
+    <span><i class="dot" style="background:var(--coral)"></i>Atrasado</span>
+    <span><i class="dot" style="background:#ff9e42"></i>Atenção</span>
+    <span><i class="dot" style="background:var(--teal)"></i>No ritmo</span>
+    <span><i class="dot" style="background:var(--gold)"></i>Meta batida</span>
+  </div>
+
+  <div class="card" id="settingsPanel">
+    <div class="settings-grid">
+      <div class="field">
+        <label>Minha meta (R$)</label>
+        <div class="input-wrap money"><span class="prefix">R$</span><input type="number" id="inMeta" min="0" step="100"></div>
+      </div>
+      <div class="field">
+        <label>Meta exigida pela empresa (R$)</label>
+        <div class="input-wrap money"><span class="prefix">R$</span><input type="number" id="inMetaOficial" value="100000" disabled></div>
+        <p class="field-note">Fixa — só de referência.</p>
+      </div>
+      <div class="field">
+        <label>Comissão</label>
+        <div class="input-wrap percent"><input type="number" id="inComissao" min="0" max="100" step="0.5"><span class="suffix">%</span></div>
+        <p class="field-note">Mudar aqui recalcula todo o histórico com a taxa nova — não guarda a taxa antiga.</p>
+      </div>
+      <div class="field"><label>Início do período apurado</label><input type="date" id="inInicio"></div>
+      <div class="field"><label>Fim do período apurado</label><input type="date" id="inFim"></div>
+    </div>
+
+    <div class="calendar-block">
+      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--gold);">▦</span>Período apurado — dias trabalhados</h2>
+      <p class="field-note">Clique em um dia para marcá-lo como não trabalhado (folga, falta, fim de semana). Esses dias saem da conta do ritmo diário.</p>
+      <button class="btn ghost" id="marcarFinsDeSemanaBtn" type="button" style="font-size:11px;padding:5px 10px;margin-bottom:10px;">Marcar sábados e domingos como folga</button>
+      <div id="calendarContainer"></div>
+      <div class="cal-legend">
+        <span><i class="dot work"></i> Trabalhado</span>
+        <span><i class="dot off"></i> Não trabalhado (clique p/ voltar)</span>
+      </div>
+    </div>
+
+    <div class="calendar-block">
+      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--gold);">◐</span>Personalizar cores</h2>
+      <div class="settings-grid">
+        <div class="field"><label>Cor de destaque (meta)</label><input type="color" id="colorGold" value="#D4AF37"></div>
+        <div class="field"><label>Cor de sucesso (no ritmo)</label><input type="color" id="colorTeal" value="#3DDC97"></div>
+        <div class="field"><label>Cor de alerta (atrasado)</label><input type="color" id="colorCoral" value="#FF6B5E"></div>
+      </div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn primary" id="saveColorsBtn" type="button" style="font-size:12px;padding:7px 14px;">Salvar cores</button>
+        <button class="btn ghost" id="resetColorsBtn" type="button" style="font-size:12px;padding:7px 14px;">Restaurar padrão</button>
+      </div>
+    </div>
+
+    <div class="calendar-block">
+      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--text-muted);">↻</span>Períodos anteriores</h2>
+      <div id="periodosList">Carregando...</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" id="saveSettingsBtn" type="button">Salvar</button>
+      <button class="btn ghost" id="encerrarBtn" type="button">Encerrar este período</button>
+      <button class="btn ghost" id="exportBtn" type="button">Exportar dados (backup)</button>
+    </div>
+    <button class="btn-danger-link" id="resetBtn" type="button">Apagar todos os dados</button>
+    <div id="exportArea" style="display:none;margin-top:12px;">
+      <textarea id="exportText" readonly style="width:100%;min-height:120px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:var(--mono);font-size:11px;"></textarea>
+      <button class="btn ghost" id="copyExportBtn" type="button" style="margin-top:8px;">Copiar</button>
+      <p class="field-note">Cole e guarde esse texto em algum lugar (bloco de notas, e-mail pra você mesmo). Se um dia os dados aqui se perderem, é só colar de volta manualmente nos campos.</p>
+    </div>
+  </div>
+
+  <div id="loading" class="skeleton">
+    <div class="skel-block skel-donut"></div>
+    <div class="skel-block skel-line" style="width:60%"></div>
+    <div class="skel-grid">
+      <div class="skel-block skel-stat"></div>
+      <div class="skel-block skel-stat"></div>
+      <div class="skel-block skel-stat"></div>
+    </div>
+  </div>
+  <div id="app" style="display:none;">
+
+    <div class="card" id="emptyHint" style="display:none;">
+      <span class="ic" style="color:var(--gold);">✦</span>
+      Primeira vez aqui? Defina sua meta em <b>"Definir minha meta"</b> e atualize seus valores em <b>"Suas vendas"</b>, aqui abaixo, para começar a acompanhar.
+    </div>
+
+    <div class="card" id="heroCard">
+      <div class="hero-top">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 220 220" class="donut-svg">
+            <defs>
+              <filter id="ringGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <circle cx="110" cy="110" r="103" class="donut-bg-outer"/>
+            <circle cx="110" cy="110" r="103" class="donut-fill-outer" id="donutTimeFill" transform="rotate(-90 110 110)"/>
+            <circle cx="110" cy="110" r="84" class="donut-bg"/>
+            <circle cx="110" cy="110" r="84" class="donut-fill" id="donutFill" transform="rotate(-90 110 110)" filter="url(#ringGlow)"/>
+            <circle id="donutCap" r="4" fill="var(--gold)"><title>Você está aqui</title></circle>
+          </svg>
+          <div class="donut-center">
+            <p class="hero-label">Falta p/ meta</p>
+            <p class="hero-number" id="heroFalta">R$ 0</p>
+          </div>
+        </div>
+        <p class="donut-caption">
+          <span><i class="dot" style="background:var(--text-muted);opacity:.6;"></i>Tempo decorrido</span>
+          <span><i class="dot" id="donutCaptionDot" style="background:var(--teal);"></i>Vendas atingidas</span>
+        </p>
+        <p class="hero-sub" id="heroSub"></p>
+        <p class="min-note" id="comparativoAnterior" style="display:none;"></p>
+        <p class="min-note" id="minNote"></p>
+        <span class="pill" id="pacePill">—</span>
+        <br>
+        <button class="btn ghost" id="shareBtn" type="button" style="font-size:11px;padding:5px 12px;margin-top:6px;">↗ Compartilhar resumo</button>
+      </div>
+
+      <h3 class="ritmo-title"><span class="ic" style="color:var(--gold);">◷</span>Ritmo do período</h3>
+      <div class="gauge-track" id="gaugeTrack">
+        <div class="gauge-fill" id="gaugeFill" style="width:0%"></div>
+        <div class="gauge-marker" id="gaugeMarker" style="left:0%"></div>
+        <span class="tip-label above" id="gaugeMarkerTip"></span>
+        <span class="tip-label below" id="gaugeCurrentTip"></span>
+      </div>
+      <div class="gauge-labels"><span>R$0</span><span id="gaugeMetaLabel">R$0</span></div>
+
+      <p class="ritmo-line" id="ritmoNecessario"></p>
+      <p class="ritmo-line" id="ritmoAtual"></p>
+    </div>
+
+    <h2 class="section-title"><span class="ic" style="color:var(--teal);">$</span>Suas vendas</h2>
+    <p class="section-desc">Atualize com os valores que aparecem no site da empresa — sem precisar lançar venda por venda.</p>
+    <div class="card" id="vendasCard">
+      <div class="values-grid">
+        <div class="value-field pago">
+          <label><span class="value-icon">●</span> Total vendas pagas <span class="unsaved-badge" id="pagoUnsavedBadge" style="display:none;">· não salvo</span></label>
+          <div class="input-wrap money edit-wrap"><span class="prefix">R$</span><input type="number" id="inPago" min="0" step="0.01" placeholder="0,00"><span class="edit-ic">✎</span></div>
+          <p class="field-note">Os clientes já pagaram essas vendas</p>
+        </div>
+        <div class="value-field apagar">
+          <label><span class="value-icon">●</span> Total vendas a pagar <span class="unsaved-badge" id="apagarUnsavedBadge" style="display:none;">· não salvo</span></label>
+          <div class="input-wrap money edit-wrap"><span class="prefix">R$</span><input type="number" id="inAPagar" min="0" step="0.01" placeholder="0,00"><span class="edit-ic">✎</span></div>
+          <p class="field-note">Vendas fechadas, aguardando pagamento dos clientes</p>
+        </div>
+      </div>
+      <div class="split-bar">
+        <div class="split-seg pago" id="splitPago" style="width:50%"></div>
+        <div class="split-seg apagar" id="splitAPagar" style="width:50%"></div>
+      </div>
+      <div class="split-labels">
+        <span><i class="dot teal"></i><span id="splitPagoLabel">Pago: R$0 (0%)</span></span>
+        <span><i class="dot coral"></i><span id="splitAPagarLabel">A pagar: R$0 (0%)</span></span>
+      </div>
+      <div class="update-row">
+        <button class="btn primary" id="updateValuesBtn" type="button">Atualizar valores</button>
+        <p class="field-note" id="lastUpdateNote"></p>
+      </div>
+      <div class="commission-footer">
+        <p class="cf-main"><span class="ic" style="color:var(--gold);">✦</span> Se tudo for pago, sua comissão total é <b id="comissaoSeTudoPago" style="cursor:pointer;" title="Clique pra copiar">R$ 0</b> <span class="ic copy-ic" id="copyComissaoIc" style="color:var(--text-muted);font-size:11px;cursor:pointer;" title="Clique no valor pra copiar">⧉</span></p>
+        <p class="cf-sub" id="comissaoSeTudoPagoSub"></p>
+      </div>
+    </div>
+
+    <h2 class="section-title"><span class="ic" style="color:var(--text-muted);">▤</span>Resumo do período</h2>
+    <div class="stats-grid">
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--teal);">✓</span> Pago</div><div class="value teal" id="statPago">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--coral);">○</span> A pagar</div><div class="value coral" id="statAPagar">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--gold);">$</span> Comissão garantida</div><div class="value gold" id="statComissao">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">$</span> Comissão a receber</div><div class="value" id="statComissaoAPagar">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">Σ</span> Total em carteira</div><div class="value" id="statCarteira">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">◷</span> Dias de trabalho restantes</div><div class="value" id="statDiasRest">0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">→</span> Projeção de fechamento</div><div class="value" id="statProjecao">R$0</div></div>
+    </div>
+
+    <h2 class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span><span class="ic" style="color:var(--gold);">↗</span>Evolução no período</span>
+      <button class="btn ghost" id="toggleChartBtn" type="button" style="font-size:11px;padding:4px 10px;">Mostrar</button>
+    </h2>
+    <p class="section-desc">Linha pontilhada: ritmo ideal para bater sua meta (só avança em dias trabalhados). Linha sólida dourada: seu total pago acumulado, registrado a cada vez que você atualiza os valores acima.</p>
+    <div class="card" id="chartCard" style="display:none;"><div class="chart-wrap" id="chartWrap"><canvas id="chart" aria-label="Gráfico de evolução: ritmo ideal comparado ao total pago acumulado no período" role="img"></canvas></div></div>
+
+  </div>
+</div>
+
+<div class="share-modal" id="shareModal" style="display:none;">
+  <div class="share-modal-inner">
+    <div class="share-card" id="shareCard">
+      <div class="share-topbar" id="shareTopbar"></div>
+      <div class="share-brand">
+        <svg width="18" height="18" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0F1115"/><path d="M6 22 L13 14 L18 18 L26 8" stroke="#D4AF37" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="8" r="2.6" fill="#3DDC97"/></svg>
+        <span class="share-brand-name">Painel de Vendas</span>
+      </div>
+      <div class="share-period" id="sharePeriod">—</div>
+
+      <div class="share-ring-wrap">
+        <svg viewBox="0 0 220 220" class="share-ring-svg">
+          <circle cx="110" cy="110" r="102" class="share-ring-bg-outer"/>
+          <circle cx="110" cy="110" r="102" class="share-ring-fill-outer" id="shareRingTime" transform="rotate(-90 110 110)"/>
+          <circle cx="110" cy="110" r="82" class="share-ring-bg"/>
+          <circle cx="110" cy="110" r="82" class="share-ring-fill" id="shareRingFill" transform="rotate(-90 110 110)"/>
+        </svg>
+        <div class="share-ring-center">
+          <div class="share-pct" id="sharePct">0%</div>
+          <div class="share-pct-label">da meta</div>
+        </div>
+      </div>
+
+      <div class="share-pace-pill" id="sharePacePill">—</div>
+
+      <div class="share-stats">
+        <div class="share-chip teal">
+          <span class="share-stat-label">Realizado</span>
+          <span class="share-stat-value" id="shareRealizado">R$0</span>
+        </div>
+        <div class="share-chip">
+          <span class="share-stat-label">Meta</span>
+          <span class="share-stat-value" id="shareMeta">R$0</span>
+        </div>
+      </div>
+
+      <div class="share-highlight" id="shareFalta"></div>
+      <div class="share-footer">Painel de Vendas · <span id="shareData"></span></div>
+    </div>
+
+    <div class="share-actions">
+      <button class="btn primary" id="downloadShareBtn" type="button">Baixar imagem</button>
+      <button class="btn ghost" id="copyShareTextBtn" type="button">Copiar texto</button>
+      <button class="btn ghost" id="closeShareBtn" type="button">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let config = null;
+let totals = { pago: 0, aPagar: 0 };
+let history = [];
+let periodosHistorico = [];
+let chartInstance = null;
+let isDirty = false;
+const META_OFICIAL = 100000;
+const DEFAULT_COLORS = { gold:'#D4AF37', teal:'#3DDC97', coral:'#FF6B5E' };
+function applyColors(colors){
+  const c = colors || DEFAULT_COLORS;
+  document.documentElement.style.setProperty('--gold', c.gold || DEFAULT_COLORS.gold);
+  document.documentElement.style.setProperty('--teal', c.teal || DEFAULT_COLORS.teal);
+  document.documentElement.style.setProperty('--coral', c.coral || DEFAULT_COLORS.coral);
+}
+const WD = ['D','S','T','Q','Q','S','S'];
+
+window.addEventListener('beforeunload', (e)=>{
+  if(isDirty){ e.preventDefault(); e.returnValue=''; }
+});
+
+const fmtBRL = (n) => 'R$ ' + (n||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtBRLCompact = (n) => {
+  const v = n||0;
+  if(Math.abs(v) >= 1000000) return 'R$ ' + (v/1000000).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mi';
+  return fmtBRL(v);
+};
+const fmtBRLShort = (n) => {
+  const v = n||0;
+  if(Math.abs(v) >= 1000000) return 'R$ ' + (v/1000000).toLocaleString('pt-BR',{maximumFractionDigits:1}) + 'mi';
+  return 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+};
+function positionTip(el, trackWidth, pct){
+  if(!trackWidth){ el.style.left = '0px'; return; }
+  const centerPx = (pct/100) * trackWidth;
+  const w = el.offsetWidth || 60;
+  let left = centerPx - w/2;
+  left = Math.max(2, Math.min(left, trackWidth - w - 2));
+  el.style.left = left + 'px';
+}
+const pad = (n) => String(n).padStart(2,'0');
+const toInputDate = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseInputDate = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const fmtDisplayDate = (s) => { const d = parseInputDate(s); return `${pad(d.getDate())}/${pad(d.getMonth()+1)}`; };
+const clamp = (n,min,max) => Math.max(min, Math.min(max,n));
+
+function colorForRatio(ratio){
+  const stops = [
+    {r:0,    c:[255,107,94]},   // vermelho — bem atrás
+    {r:0.5,  c:[255,158,66]},   // laranja
+    {r:0.8,  c:[240,205,70]},   // amarelo
+    {r:1,    c:[61,220,151]},   // verde — no ritmo
+    {r:1.25, c:[212,175,55]}    // dourado — acima do ritmo
+  ];
+  const t = clamp(ratio, 0, 1.25);
+  for(let i=0;i<stops.length-1;i++){
+    const a=stops[i], b=stops[i+1];
+    if(t>=a.r && t<=b.r){
+      const f=(t-a.r)/(b.r-a.r);
+      const c=[0,1,2].map(j=>Math.round(a.c[j]+(b.c[j]-a.c[j])*f));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+  }
+  return `rgb(${stops[stops.length-1].c.join(',')})`;
+}
+
+function formatMoneyValue(n){ return (n||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function parseMoneyValue(str){
+  if(!str) return 0;
+  const cleaned = String(str).replace(/\./g,'').replace(',', '.');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+let dirtyFields = new Set();
+function updateDirtyBadges(){
+  const pagoBadge = document.getElementById('pagoUnsavedBadge');
+  const apagarBadge = document.getElementById('apagarUnsavedBadge');
+  if(pagoBadge) pagoBadge.style.display = dirtyFields.has('pago') ? 'inline' : 'none';
+  if(apagarBadge) apagarBadge.style.display = dirtyFields.has('aPagar') ? 'inline' : 'none';
+}
+
+function attachMoneyMask(el, fieldName){
+  el.setAttribute('type','text');
+  el.setAttribute('inputmode','decimal');
+  el.addEventListener('input', ()=>{
+    let digits = el.value.replace(/\D/g,'');
+    digits = digits.replace(/^0+(?=\d)/,'');
+    if(!digits) digits = '0';
+    const value = parseInt(digits,10)/100;
+    el.value = formatMoneyValue(value);
+    isDirty = true;
+    if(fieldName){ dirtyFields.add(fieldName); updateDirtyBadges(); }
+  });
+}
+
+function defaultPeriod(){
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  return { start: toInputDate(start), end: toInputDate(end) };
+}
+
+function enumerateDays(start,end){
+  const arr=[]; let d=new Date(start);
+  while(d<=end){ arr.push(new Date(d)); d.setDate(d.getDate()+1); }
+  return arr;
+}
+function isExcluded(dateStr){ return (config.excludedDays||[]).includes(dateStr); }
+function workDaysBetween(start,end){
+  if(start>end) return [];
+  return enumerateDays(start,end).filter(d=>!isExcluded(toInputDate(d)));
+}
+
+async function loadAll(){
+  try{
+    const c = await window.storage.get('sales-config');
+    config = c ? JSON.parse(c.value) : null;
+  }catch(e){ config = null; }
+  if(!config){
+    const p = defaultPeriod();
+    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS} };
+    await saveConfig();
+  } else {
+    if(config.metaPessoal === undefined) config.metaPessoal = config.meta || META_OFICIAL;
+    if(!config.excludedDays) config.excludedDays = [];
+    if(!config.colors) config.colors = {...DEFAULT_COLORS};
+  }
+  try{
+    const t = await window.storage.get('sales-totals');
+    totals = t ? JSON.parse(t.value) : { pago: 0, aPagar: 0 };
+  }catch(e){ totals = { pago: 0, aPagar: 0 }; }
+  try{
+    const h = await window.storage.get('sales-history');
+    history = h ? JSON.parse(h.value) : [];
+  }catch(e){ history = []; }
+  try{
+    const per = await window.storage.get('sales-periodos');
+    periodosHistorico = per ? JSON.parse(per.value) : [];
+  }catch(e){ periodosHistorico = []; }
+}
+
+function showStatus(msg, isError){
+  const el = document.getElementById('statusBanner');
+  el.textContent = msg;
+  el.className = 'status-banner show ' + (isError ? 'error' : 'success');
+  clearTimeout(window._statusTimer);
+  window._statusTimer = setTimeout(()=>{ el.classList.remove('show'); }, 4500);
+}
+
+function showStatusWithUndo(msg, undoFn, timeoutMs){
+  const el = document.getElementById('statusBanner');
+  el.innerHTML = msg + ' <button id="undoBtn" type="button" style="margin-left:8px;background:none;border:1px solid currentColor;color:inherit;border-radius:14px;padding:2px 10px;font-size:11px;cursor:pointer;">Desfazer</button>';
+  el.className = 'status-banner show success';
+  document.getElementById('undoBtn').onclick = ()=>{ undoFn(); el.classList.remove('show'); };
+  clearTimeout(window._statusTimer);
+  window._statusTimer = setTimeout(()=>{ el.classList.remove('show'); }, timeoutMs || 8000);
+}
+
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(()=>reject(new Error('timeout')), ms))
+  ]);
+}
+
+async function storageSet(key, value){
+  for(let attempt=0; attempt<2; attempt++){
+    try{ await withTimeout(window.storage.set(key, value), 7000); return true; }
+    catch(e){
+      console.error('Storage set failed', key, e);
+      if(attempt===0) await new Promise(r=>setTimeout(r,700));
+    }
+  }
+  return false;
+}
+
+async function saveConfig(){ return await storageSet('sales-config', JSON.stringify(config)); }
+async function saveTotals(){ return await storageSet('sales-totals', JSON.stringify(totals)); }
+async function saveHistory(){ return await storageSet('sales-history', JSON.stringify(history)); }
+
+function computeMetrics(){
+  const meta = config.metaPessoal;
+  const falta = Math.max(meta - totals.pago, 0);
+  const percentual = meta>0 ? clamp((totals.pago/meta)*100,0,100) : 0;
+  const comissaoGarantida = totals.pago * (config.comissaoPct/100);
+  const comissaoAPagar = totals.aPagar * (config.comissaoPct/100);
+
+  const start = parseInputDate(config.periodStart);
+  const end = parseInputDate(config.periodEnd);
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  const diasTotais = Math.max(workDaysBetween(start,end).length, 1);
+  let diasTranscorridos = 0;
+  if(hoje >= start) diasTranscorridos = workDaysBetween(start, hoje<end?hoje:end).length;
+  let diasRestantes = 0;
+  if(hoje <= end) diasRestantes = workDaysBetween(hoje<start?start:hoje, end).length;
+
+  const metaHojeLinear = meta * (diasTranscorridos/diasTotais);
+  const ritmoNecessarioDiario = diasRestantes>0 ? falta/diasRestantes : falta;
+  const ritmoAtualDiario = diasTranscorridos>0 ? totals.pago/diasTranscorridos : 0;
+  const onPace = totals.pago >= metaHojeLinear;
+  const metaBatida = totals.pago >= meta;
+  const oficialBatida = totals.pago >= META_OFICIAL;
+  const projecaoFinal = ritmoAtualDiario * diasTotais;
+
+  return { meta, falta, percentual, comissaoGarantida, comissaoAPagar, start, end, hoje,
+    diasTotais, diasTranscorridos, diasRestantes, ritmoNecessarioDiario, ritmoAtualDiario,
+    onPace, metaBatida, oficialBatida, metaHojeLinear, projecaoFinal };
+}
+
+function render(){
+  const m = computeMetrics();
+  document.title = `${Math.round(m.percentual)}% · Painel de Vendas`;
+  applyColors(config.colors);
+  const colors = config.colors || DEFAULT_COLORS;
+  document.getElementById('colorGold').value = colors.gold;
+  document.getElementById('colorTeal').value = colors.teal;
+  document.getElementById('colorCoral').value = colors.coral;
+
+  document.getElementById('periodLine').innerHTML =
+    `Período apurado: <b>${fmtDisplayDate(config.periodStart)} a ${fmtDisplayDate(config.periodEnd)}</b> · Comissão ${config.comissaoPct}%` +
+    ` <button id="toggleSettingsBtn2" type="button">Definir minha meta</button>` +
+    ` <button id="toggleCompactBtn" type="button">${document.body.classList.contains('compact-mode') ? 'Ver tudo' : 'Modo compacto'}</button>`;
+  document.getElementById('toggleSettingsBtn2').onclick = toggleSettings;
+  document.getElementById('toggleCompactBtn').onclick = () => {
+    document.body.classList.toggle('compact-mode');
+    render();
+  };
+
+  document.getElementById('heroFalta').textContent = m.metaBatida ? 'Meta batida! 🎉' : fmtBRLCompact(m.falta);
+  document.getElementById('heroSub').textContent = `Minha meta: ${fmtBRL(m.meta)} · Já pago: ${fmtBRL(totals.pago)}`;
+  const comparativo = document.getElementById('comparativoAnterior');
+  if(periodosHistorico.length){
+    const anterior = periodosHistorico[periodosHistorico.length-1];
+    if(anterior.totalPago > 0){
+      const variacao = ((totals.pago - anterior.totalPago) / anterior.totalPago) * 100;
+      const sinal = variacao >= 0 ? '+' : '';
+      comparativo.textContent = `${sinal}${variacao.toFixed(0)}% vs. período anterior (${fmtBRL(anterior.totalPago)})`;
+      comparativo.style.color = variacao >= 0 ? 'var(--teal)' : 'var(--coral)';
+      comparativo.style.display = 'block';
+    } else { comparativo.style.display = 'none'; }
+  } else { comparativo.style.display = 'none'; }
+  const minNote = document.getElementById('minNote');
+  minNote.textContent = m.oficialBatida ? `✓ Mínimo exigido pela empresa (${fmtBRL(META_OFICIAL)}) já batido` : `Mínimo exigido pela empresa: ${fmtBRL(META_OFICIAL)}`;
+  minNote.className = 'min-note' + (m.oficialBatida ? ' met' : '');
+
+  const pill = document.getElementById('pacePill');
+  if(m.metaBatida){ pill.className='pill done'; pill.textContent='Meta batida'; }
+  else if(m.onPace){ pill.className='pill ahead'; pill.textContent='No ritmo'; }
+  else { pill.className='pill behind'; pill.textContent='Atrás do ritmo'; }
+
+  document.getElementById('gaugeFill').style.width = m.percentual+'%';
+  const ratio = m.metaHojeLinear>0 ? (totals.pago/m.metaHojeLinear) : (totals.pago>0?1.25:1);
+  document.getElementById('gaugeFill').style.background = m.metaBatida ? 'var(--gold)' : colorForRatio(ratio);
+  const donutFill = document.getElementById('donutFill');
+  const donutR = 84, donutC = 2*Math.PI*donutR;
+  donutFill.style.strokeDasharray = donutC;
+  donutFill.style.strokeDashoffset = donutC * (1 - m.percentual/100);
+  const donutColor = m.metaBatida ? 'var(--gold)' : colorForRatio(ratio);
+  donutFill.style.stroke = donutColor;
+
+  const donutOuterR = 103, donutOuterC = 2*Math.PI*donutOuterR;
+  const pctTempo = clamp((m.diasTranscorridos/m.diasTotais)*100, 0, 100);
+  const donutTimeFill = document.getElementById('donutTimeFill');
+  donutTimeFill.style.strokeDasharray = donutOuterC;
+  donutTimeFill.style.strokeDashoffset = donutOuterC * (1 - pctTempo/100);
+
+  const capAngle = (m.percentual/100) * 2*Math.PI - Math.PI/2;
+  const donutCap = document.getElementById('donutCap');
+  donutCap.setAttribute('cx', 110 + donutR*Math.cos(capAngle));
+  donutCap.setAttribute('cy', 110 + donutR*Math.sin(capAngle));
+  donutCap.setAttribute('fill', donutColor);
+  document.getElementById('donutCaptionDot').style.background = donutColor;
+  const markerPct = clamp((m.diasTranscorridos/m.diasTotais)*100,0,100);
+  document.getElementById('gaugeMarker').style.left = clamp(markerPct,4,96)+'%';
+  document.getElementById('gaugeMetaLabel').textContent = fmtBRL(m.meta);
+
+  const idealTip = document.getElementById('gaugeMarkerTip');
+  const realizadoTip = document.getElementById('gaugeCurrentTip');
+  idealTip.textContent = `Ideal: ${fmtBRLShort(m.metaHojeLinear)}`;
+  realizadoTip.textContent = `Realizado: ${fmtBRLShort(totals.pago)}`;
+  const trackWidth = document.getElementById('gaugeTrack').getBoundingClientRect().width;
+  positionTip(idealTip, trackWidth, markerPct);
+  positionTip(realizadoTip, trackWidth, m.percentual);
+
+  document.getElementById('ritmoNecessario').innerHTML = m.metaBatida ? 'Você já garantiu a sua meta neste período. 👏' :
+    `Para manter o ritmo, você precisa vender <b>${fmtBRL(m.ritmoNecessarioDiario)}</b> por dia nos ${m.diasRestantes} dia(s) de trabalho restantes.`;
+  document.getElementById('ritmoAtual').innerHTML = `Seu ritmo médio atual é de <b>${fmtBRL(m.ritmoAtualDiario)}</b>/dia trabalhado (${m.diasTranscorridos} dia(s) decorridos).`;
+
+  document.getElementById('statPago').textContent = fmtBRL(totals.pago);
+  document.getElementById('statAPagar').textContent = fmtBRL(totals.aPagar);
+  document.getElementById('statComissao').textContent = fmtBRL(m.comissaoGarantida);
+  document.getElementById('statComissaoAPagar').textContent = fmtBRL(m.comissaoAPagar);
+  document.getElementById('statCarteira').textContent = fmtBRL(totals.pago + totals.aPagar);
+  const statDiasRestEl = document.getElementById('statDiasRest');
+  statDiasRestEl.textContent = m.diasRestantes;
+  statDiasRestEl.className = 'value' + (m.diasRestantes>0 && m.diasRestantes<=2 && !m.metaBatida ? ' coral' : '');
+  const statProjecao = document.getElementById('statProjecao');
+  statProjecao.textContent = fmtBRL(m.projecaoFinal);
+  statProjecao.className = 'value ' + (m.projecaoFinal >= m.meta ? 'teal' : 'coral');
+
+  const carteiraTotal = totals.pago + totals.aPagar;
+  const pctPagoBar = carteiraTotal>0 ? (totals.pago/carteiraTotal)*100 : 50;
+  const pctAPagarBar = 100 - pctPagoBar;
+  document.getElementById('splitPago').style.width = pctPagoBar+'%';
+  document.getElementById('splitAPagar').style.width = pctAPagarBar+'%';
+  document.getElementById('splitPagoLabel').textContent = `Pago: ${fmtBRL(totals.pago)} (${Math.round(pctPagoBar)}%)`;
+  document.getElementById('splitAPagarLabel').textContent = `A pagar: ${fmtBRL(totals.aPagar)} (${Math.round(pctAPagarBar)}%)`;
+
+  const comissaoSeTudoPago = carteiraTotal * (config.comissaoPct/100);
+  document.getElementById('comissaoSeTudoPago').textContent = fmtBRL(comissaoSeTudoPago);
+  document.getElementById('comissaoSeTudoPagoSub').textContent = `Sobre ${fmtBRL(carteiraTotal)} em vendas (pagas + a pagar), a ${config.comissaoPct}%`;
+
+  document.getElementById('inMeta').value = formatMoneyValue(config.metaPessoal);
+  document.getElementById('inComissao').value = config.comissaoPct;
+  document.getElementById('inInicio').value = config.periodStart;
+  document.getElementById('inFim').value = config.periodEnd;
+  document.getElementById('inPago').value = formatMoneyValue(totals.pago);
+  document.getElementById('inAPagar').value = formatMoneyValue(totals.aPagar);
+
+  const lastDate = history.length ? history.map(h=>h.date).sort().slice(-1)[0] : null;
+  document.getElementById('lastUpdateNote').textContent = lastDate ? `Última atualização: ${fmtDisplayDate(lastDate)}` : 'Ainda sem atualização registrada';
+
+  document.getElementById('emptyHint').style.display =
+    (totals.pago===0 && totals.aPagar===0 && history.length===0) ? 'block' : 'none';
+
+  renderCalendar();
+  renderPeriodosHistorico();
+  renderChart(m);
+}
+
+function renderPeriodosHistorico(){
+  const el = document.getElementById('periodosList');
+  if(!periodosHistorico.length){ el.innerHTML = '<p class="field-note">Nenhum período encerrado ainda.</p>'; return; }
+  const totalComissao = periodosHistorico.reduce((a,p)=>a+p.comissaoGanha,0);
+  const resumo = `<p class="field-note" style="margin-bottom:8px;">Total acumulado: <b style="color:var(--gold);">${fmtBRL(totalComissao)}</b> em comissão, em ${periodosHistorico.length} período(s) encerrado(s).</p>`;
+  const linhas = periodosHistorico.slice().reverse().map((p, i)=>{
+    const ok = p.metaBatida;
+    const idxReal = periodosHistorico.length - 1 - i;
+    return `<div class="periodo-row${i===0?' recent':''}">
+      <span>${fmtDisplayDate(p.periodStart)}–${fmtDisplayDate(p.periodEnd)}</span>
+      <span class="valores">${fmtBRL(p.totalPago)} <span class="status ${ok?'ok':'no'}">${ok?'✓ meta batida':'não bateu'}</span>
+        <button class="del-periodo" data-idx="${idxReal}" type="button" title="Excluir este registro" aria-label="Excluir este período">✕</button>
+      </span>
+    </div>`;
+  }).join('');
+  el.innerHTML = resumo + linhas;
+  el.querySelectorAll('.del-periodo').forEach(btn=>{
+    btn.onclick = () => excluirPeriodo(parseInt(btn.dataset.idx,10));
+  });
+}
+
+async function excluirPeriodo(idx){
+  if(!confirm('Excluir este registro de período anterior? Isso não afeta seus dados atuais, só remove do histórico.')) return;
+  periodosHistorico.splice(idx,1);
+  await storageSet('sales-periodos', JSON.stringify(periodosHistorico));
+  renderPeriodosHistorico();
+  showStatus('Registro removido.', false);
+}
+
+function renderCalendar(){
+  const start = parseInputDate(config.periodStart);
+  const end = parseInputDate(config.periodEnd);
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const container = document.getElementById('calendarContainer');
+  container.innerHTML = '';
+
+  const months = [];
+  let cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+  while(cursor <= last){ months.push(new Date(cursor)); cursor.setMonth(cursor.getMonth()+1); }
+
+  months.forEach(monthDate=>{
+    const y = monthDate.getFullYear(), mo = monthDate.getMonth();
+    const isCurrentMonth = (hoje.getFullYear()===y && hoje.getMonth()===mo);
+
+    const wrapMulti = months.length > 1;
+    const details = wrapMulti ? document.createElement('details') : null;
+    if(details){ details.open = isCurrentMonth || months.length<=1; }
+    const holder = details || container;
+
+    const label = document.createElement(wrapMulti ? 'summary' : 'div');
+    label.className = 'cal-month-label';
+    label.textContent = monthDate.toLocaleDateString('pt-BR', {month:'long', year:'numeric'});
+    holder.appendChild(label);
+
+    const grid = document.createElement('div');
+    grid.className = 'cal-grid';
+    WD.forEach(w=>{ const el=document.createElement('div'); el.className='cal-wd'; el.textContent=w; grid.appendChild(el); });
+
+    const firstDay = new Date(y, mo, 1);
+    const leading = firstDay.getDay();
+    for(let i=0;i<leading;i++){ const el=document.createElement('div'); grid.appendChild(el); }
+
+    const daysInMonth = new Date(y, mo+1, 0).getDate();
+    for(let day=1; day<=daysInMonth; day++){
+      const d = new Date(y, mo, day);
+      const key = toInputDate(d);
+      const inPeriod = d >= start && d <= end;
+      const el = document.createElement(inPeriod ? 'button' : 'div');
+      el.textContent = day;
+      el.className = 'cal-day' + (!inPeriod ? ' out' : (isExcluded(key) ? ' off' : '')) + (key===toInputDate(hoje) ? ' today' : '');
+      if(inPeriod){
+        el.type = 'button';
+        el.setAttribute('aria-pressed', isExcluded(key) ? 'true' : 'false');
+        el.setAttribute('aria-label', `Dia ${day}, ${isExcluded(key) ? 'não trabalhado' : 'trabalhado'} — clique pra alternar`);
+        el.onclick = () => toggleDay(key);
+      }
+      grid.appendChild(el);
+    }
+    holder.appendChild(grid);
+    if(details) container.appendChild(details);
+  });
+}
+
+async function marcarFinsDeSemana(){
+  const start = parseInputDate(config.periodStart);
+  const end = parseInputDate(config.periodEnd);
+  enumerateDays(start, end).forEach(d=>{
+    if(d.getDay()===0 || d.getDay()===6){
+      const key = toInputDate(d);
+      if(!config.excludedDays.includes(key)) config.excludedDays.push(key);
+    }
+  });
+  const ok = await saveConfig();
+  render();
+  showStatus(ok ? 'Sábados e domingos marcados como folga.' : 'Aplicado na tela, mas não consegui salvar agora.', !ok);
+}
+
+let calendarBusy = false;
+async function toggleDay(key){
+  if(calendarBusy) return;
+  calendarBusy = true;
+  const idx = config.excludedDays.indexOf(key);
+  if(idx>=0) config.excludedDays.splice(idx,1);
+  else config.excludedDays.push(key);
+  const ok = await saveConfig();
+  render();
+  calendarBusy = false;
+  if(!ok) showStatus('Não consegui salvar essa alteração no calendário. Tenta de novo.', true);
+}
+
+function renderChart(m){
+  const days = enumerateDays(m.start, m.end);
+  const labels = days.map(d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}`);
+
+  let counter = 0;
+  const metaLine = days.map(d=>{
+    if(!isExcluded(toInputDate(d))) counter++;
+    return m.meta * (counter/m.diasTotais);
+  });
+
+  const histByDate = {};
+  history.forEach(h=>{ histByDate[h.date] = h.pago; });
+  const todayKey = toInputDate(m.hoje);
+  if(!histByDate[todayKey] && m.hoje>=m.start && m.hoje<=m.end) histByDate[todayKey] = totals.pago;
+  const actualLine = days.map(d=>{
+    if(d > m.hoje) return null;
+    const key = toInputDate(d);
+    return histByDate[key] !== undefined ? histByDate[key] : null;
+  });
+
+  const pointCount = Object.keys(histByDate).length;
+  document.getElementById('chartWrap').querySelector('.chart-empty')?.remove();
+  if(pointCount < 2){
+    const overlay = document.createElement('div');
+    overlay.className = 'chart-empty';
+    overlay.textContent = 'Ainda não há histórico suficiente pra desenhar a evolução — atualize seus valores em dias diferentes e essa curva vai se formando sozinha.';
+    document.getElementById('chartWrap').appendChild(overlay);
+  }
+
+  const ctx = document.getElementById('chart').getContext('2d');
+  if(chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'Ritmo ideal (dias trabalhados)', data: metaLine, borderColor:'#8B93A1', borderDash:[5,4], pointRadius:0, borderWidth:1.5, tension:0 },
+      { label:'Pago (acumulado)', data: actualLine, borderColor:'#D4AF37', backgroundColor:'rgba(212,175,55,0.12)', fill:true, pointRadius:3, borderWidth:2.5, tension:.15, spanGaps:true }
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{intersect:false, mode:'index'},
+      plugins:{ legend:{labels:{color:'#8B93A1', font:{family:'monospace', size:11}}} },
+      scales:{
+        x:{ ticks:{color:'#8B93A1', font:{size:10}}, grid:{color:'#2A2F3A'} },
+        y:{ ticks:{color:'#8B93A1', font:{size:10}, callback:(v)=>'R$'+(v/1000)+'k' }, grid:{color:'#2A2F3A'} }
+      }
+    }
+  });
+}
+
+function toggleSettings(){ document.getElementById('settingsPanel').classList.toggle('open'); }
+
+function toRgba(colorStr, alpha){
+  if(colorStr.startsWith('#')){
+    const hex = colorStr.replace('#','');
+    const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  const mm = colorStr.match(/rgb\((\d+),(\d+),(\d+)\)/);
+  if(mm) return `rgba(${mm[1]},${mm[2]},${mm[3]},${alpha})`;
+  return colorStr;
+}
+
+function openShareModal(){
+  const m = computeMetrics();
+  document.getElementById('sharePeriod').textContent = `${fmtDisplayDate(config.periodStart)} a ${fmtDisplayDate(config.periodEnd)}`;
+  document.getElementById('sharePct').textContent = Math.round(m.percentual) + '%';
+  document.getElementById('shareRealizado').textContent = fmtBRLCompact(totals.pago);
+  document.getElementById('shareMeta').textContent = fmtBRLCompact(m.meta);
+  document.getElementById('shareFalta').innerHTML = m.metaBatida
+    ? '🎉 Meta batida neste período!'
+    : `Faltam <b>${fmtBRLCompact(m.falta)}</b> pra bater a meta`;
+  document.getElementById('shareData').textContent = new Date().toLocaleDateString('pt-BR');
+
+  const ratio = m.metaHojeLinear>0 ? (totals.pago/m.metaHojeLinear) : (totals.pago>0?1.25:1);
+  const statusColor = m.metaBatida ? '#D4AF37' : colorForRatio(ratio);
+
+  const ring = document.getElementById('shareRingFill');
+  const R = 82, C = 2*Math.PI*R;
+  ring.style.strokeDasharray = C;
+  ring.style.strokeDashoffset = C * (1 - m.percentual/100);
+  ring.style.stroke = statusColor;
+
+  const ringTime = document.getElementById('shareRingTime');
+  const Rt = 102, Ct = 2*Math.PI*Rt;
+  const pctTempo = clamp((m.diasTranscorridos/m.diasTotais)*100, 0, 100);
+  ringTime.style.strokeDasharray = Ct;
+  ringTime.style.strokeDashoffset = Ct * (1 - pctTempo/100);
+
+  const pill = document.getElementById('sharePacePill');
+  pill.textContent = m.metaBatida ? 'Meta batida' : (m.onPace ? 'No ritmo' : 'Atrás do ritmo');
+  pill.style.background = toRgba(statusColor, 0.16);
+  pill.style.color = statusColor;
+
+  document.getElementById('shareTopbar').style.background = statusColor;
+
+  document.getElementById('shareModal').style.display = 'flex';
+}
+
+function closeShareModal(){
+  document.getElementById('shareModal').style.display = 'none';
+}
+
+async function downloadShareImage(){
+  const card = document.getElementById('shareCard');
+  showStatus('Gerando imagem...', false);
+  try{
+    const canvas = await html2canvas(card, { backgroundColor: '#0F1115', scale: 2 });
+    const link = document.createElement('a');
+    link.download = 'painel-vendas-resumo.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showStatus('Imagem baixada.', false);
+  }catch(e){
+    console.error('Erro ao gerar imagem', e);
+    showStatus('Não consegui gerar a imagem agora.', true);
+  }
+}
+
+function copyShareText(){
+  const m = computeMetrics();
+  const txt = `📊 Painel de Vendas — ${fmtDisplayDate(config.periodStart)} a ${fmtDisplayDate(config.periodEnd)}\n` +
+    `${Math.round(m.percentual)}% da meta\n` +
+    `Realizado: ${fmtBRL(totals.pago)} de ${fmtBRL(m.meta)}\n` +
+    (m.metaBatida ? 'Meta batida! 🎉' : `Faltam ${fmtBRL(m.falta)}`);
+  navigator.clipboard?.writeText(txt).then(()=>showStatus('Texto copiado.', false)).catch(()=>{});
+}
+
+function toggleChart(){
+  const card = document.getElementById('chartCard');
+  const btn = document.getElementById('toggleChartBtn');
+  const show = card.style.display === 'none';
+  card.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? 'Ocultar' : 'Mostrar';
+  if(show && chartInstance) chartInstance.resize();
+}
+
+let lastEncerrarSnapshot = null;
+
+async function encerrarPeriodo(){
+  if(!confirm('Isso vai arquivar o resultado deste período nos "Períodos anteriores" e começar um novo período, zerando pago/a pagar. Continuar?')) return;
+  setBusy('encerrarBtn', true, 'Encerrando...');
+  const snapshot = {
+    config: JSON.parse(JSON.stringify(config)),
+    totals: { ...totals },
+    history: JSON.parse(JSON.stringify(history)),
+    periodosLen: periodosHistorico.length
+  };
+  try{
+    const m = computeMetrics();
+    const registro = {
+      periodStart: config.periodStart,
+      periodEnd: config.periodEnd,
+      metaPessoal: config.metaPessoal,
+      totalPago: totals.pago,
+      totalAPagar: totals.aPagar,
+      comissaoGanha: totals.pago * (config.comissaoPct/100),
+      metaBatida: m.metaBatida,
+      encerradoEm: toInputDate(new Date())
+    };
+    periodosHistorico.push(registro);
+    await storageSet('sales-periodos', JSON.stringify(periodosHistorico));
+
+    const novoStart = new Date(config.periodEnd.split('-').map(Number)[0], config.periodEnd.split('-').map(Number)[1]-1, config.periodEnd.split('-').map(Number)[2]);
+    novoStart.setDate(novoStart.getDate()+1);
+    const novoEnd = new Date(novoStart.getFullYear(), novoStart.getMonth()+1, 0);
+    config = { ...config, periodStart: toInputDate(novoStart), periodEnd: toInputDate(novoEnd), excludedDays: [] };
+    totals = { pago: 0, aPagar: 0 };
+    history = [];
+    await saveConfig(); await saveTotals(); await saveHistory();
+    render();
+    lastEncerrarSnapshot = snapshot;
+  }catch(e){
+    console.error('Erro ao encerrar período', e);
+  }finally{
+    setBusy('encerrarBtn', false);
+    showStatusWithUndo('Período encerrado e arquivado. Novo período iniciado.', desfazerEncerrar, 8000);
+    document.getElementById('settingsPanel').classList.remove('open');
+  }
+}
+
+async function desfazerEncerrar(){
+  if(!lastEncerrarSnapshot) return;
+  config = lastEncerrarSnapshot.config;
+  totals = lastEncerrarSnapshot.totals;
+  history = lastEncerrarSnapshot.history;
+  periodosHistorico = periodosHistorico.slice(0, lastEncerrarSnapshot.periodosLen);
+  await saveConfig(); await saveTotals(); await saveHistory();
+  await storageSet('sales-periodos', JSON.stringify(periodosHistorico));
+  lastEncerrarSnapshot = null;
+  render();
+  showStatus('Desfeito — período anterior restaurado.', false);
+}
+
+function exportData(){
+  const data = { config, totals, history, periodosHistorico };
+  document.getElementById('exportText').value = JSON.stringify(data, null, 2);
+  document.getElementById('exportArea').style.display = 'block';
+}
+
+function copyExport(){
+  const ta = document.getElementById('exportText');
+  ta.focus(); ta.select();
+  try{
+    navigator.clipboard.writeText(ta.value);
+    showStatus('Copiado para a área de transferência.', false);
+  }catch(e){
+    showStatus('Não consegui copiar automaticamente — selecione o texto e use Ctrl+C.', true);
+  }
+}
+
+function animateNumberText(el, from, to, duration){
+  if(!el) return;
+  const start = performance.now();
+  const d = duration || 500;
+  function step(now){
+    const t = Math.min((now-start)/d, 1);
+    const eased = 1 - Math.pow(1-t, 3);
+    el.textContent = fmtBRL(from + (to-from)*eased);
+    if(t<1) requestAnimationFrame(step);
+    else el.textContent = fmtBRL(to);
+  }
+  requestAnimationFrame(step);
+}
+
+async function updateValues(){
+  const oldPago = totals.pago, oldAPagar = totals.aPagar;
+  const pago = parseMoneyValue(document.getElementById('inPago').value);
+  const aPagar = parseMoneyValue(document.getElementById('inAPagar').value);
+
+  if(oldPago > 100 && pago > 0 && pago < oldPago * 0.5){
+    const confirma = confirm(`O valor pago caiu de ${fmtBRL(oldPago)} pra ${fmtBRL(pago)} — bem menor que antes. Foi isso mesmo que você quis digitar?`);
+    if(!confirma) return;
+  }
+
+  totals = { pago, aPagar };
+
+  if(!navigator.onLine){
+    showStatus('Sem conexão com a internet. Os valores ficam na tela, mas só salvam quando a conexão voltar.', true);
+    render();
+    return;
+  }
+
+  setBusy('updateValuesBtn', true, 'Salvando...');
+  let okT = false, okH = false;
+  try{
+    okT = await saveTotals();
+
+    const todayKey = toInputDate(new Date());
+    const idx = history.findIndex(h=>h.date===todayKey);
+    if(idx>=0) history[idx] = { date: todayKey, pago, aPagar };
+    else history.push({ date: todayKey, pago, aPagar });
+    if(history.length > 120) history = history.slice(history.length - 120);
+    okH = await saveHistory();
+
+    render();
+  }catch(e){
+    console.error('Erro ao atualizar valores', e);
+  }finally{
+    setBusy('updateValuesBtn', false);
+  }
+  if(okT && okH){ isDirty = false; dirtyFields.clear(); updateDirtyBadges(); }
+  showStatus((okT && okH) ? 'Valores atualizados.' : 'Não consegui salvar agora. Tenta de novo em alguns segundos.', !(okT && okH));
+
+  const vendasCard = document.getElementById('vendasCard');
+  if(vendasCard){ vendasCard.classList.add('flash'); setTimeout(()=>vendasCard.classList.remove('flash'), 900); }
+
+  const pct = config.comissaoPct/100;
+  animateNumberText(document.getElementById('statPago'), oldPago, pago);
+  animateNumberText(document.getElementById('statAPagar'), oldAPagar, aPagar);
+  animateNumberText(document.getElementById('statCarteira'), oldPago+oldAPagar, pago+aPagar);
+  animateNumberText(document.getElementById('statComissao'), oldPago*pct, pago*pct);
+  animateNumberText(document.getElementById('statComissaoAPagar'), oldAPagar*pct, aPagar*pct);
+  animateNumberText(document.getElementById('comissaoSeTudoPago'), (oldPago+oldAPagar)*pct, (pago+aPagar)*pct);
+  if(pago < config.metaPessoal){
+    animateNumberText(document.getElementById('heroFalta'), Math.max(config.metaPessoal-oldPago,0), Math.max(config.metaPessoal-pago,0));
+  }
+}
+
+function flashCopied(el){
+  let flash = el.nextElementSibling;
+  if(!flash || !flash.classList.contains('copy-flash')){
+    flash = document.createElement('span');
+    flash.className = 'copy-flash';
+    flash.textContent = '✓ copiado';
+    el.insertAdjacentElement('afterend', flash);
+  }
+  flash.classList.add('show');
+  clearTimeout(flash._timer);
+  flash._timer = setTimeout(()=>flash.classList.remove('show'), 1300);
+}
+
+function copyElementText(el){
+  const txt = el.textContent;
+  navigator.clipboard?.writeText(txt).then(()=>{
+    flashCopied(el);
+    showStatus('Copiado: '+txt, false);
+  }).catch(()=>{});
+}
+
+function makeCopyable(el){
+  if(!el) return;
+  el.style.cursor = el.style.cursor || 'context-menu';
+  el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); copyElementText(el); });
+  let pressTimer = null;
+  el.addEventListener('touchstart', ()=>{ pressTimer = setTimeout(()=>copyElementText(el), 550); }, {passive:true});
+  el.addEventListener('touchend', ()=>clearTimeout(pressTimer));
+  el.addEventListener('touchmove', ()=>clearTimeout(pressTimer));
+}
+
+function setBusy(id, busy, busyLabel){
+  const btn = document.getElementById(id);
+  if(!btn) return;
+  if(busy){
+    if(!btn.dataset.origText) btn.dataset.origText = btn.textContent;
+    btn.textContent = busyLabel || 'Aguarde...';
+    btn.disabled = true;
+  } else {
+    btn.textContent = btn.dataset.origText || btn.textContent;
+    btn.disabled = false;
+  }
+}
+
+async function saveSettings(){
+  const periodStart = document.getElementById('inInicio').value;
+  const periodEnd = document.getElementById('inFim').value;
+  if(periodStart && periodEnd && periodStart > periodEnd){
+    showStatus('A data de início não pode ser depois da data de fim. Corrija antes de salvar.', true);
+    return;
+  }
+  let ok = false;
+  setBusy('saveSettingsBtn', true, 'Salvando...');
+  try{
+    const metaPessoal = parseMoneyValue(document.getElementById('inMeta').value);
+    const comissaoPct = parseFloat(document.getElementById('inComissao').value) || 0;
+    config = { metaPessoal, comissaoPct, periodStart, periodEnd, excludedDays: config.excludedDays||[] };
+    ok = await saveConfig();
+    render();
+  }catch(e){
+    console.error('Erro ao salvar meta', e);
+  }finally{
+    setBusy('saveSettingsBtn', false);
+    showStatus(ok ? 'Meta salva.' : 'Meta aplicada na tela, mas pode não ter sido salva no servidor. Confirme depois de recarregar a página.', !ok);
+    document.getElementById('settingsPanel').classList.remove('open');
+  }
+}
+
+async function saveColors(){
+  const colors = {
+    gold: document.getElementById('colorGold').value,
+    teal: document.getElementById('colorTeal').value,
+    coral: document.getElementById('colorCoral').value
+  };
+  config.colors = colors;
+  applyColors(colors);
+  const ok = await saveConfig();
+  showStatus(ok ? 'Cores salvas.' : 'Cores aplicadas na tela, mas não salvas no servidor.', !ok);
+}
+
+async function resetColors(){
+  config.colors = { ...DEFAULT_COLORS };
+  applyColors(config.colors);
+  document.getElementById('colorGold').value = DEFAULT_COLORS.gold;
+  document.getElementById('colorTeal').value = DEFAULT_COLORS.teal;
+  document.getElementById('colorCoral').value = DEFAULT_COLORS.coral;
+  const ok = await saveConfig();
+  showStatus(ok ? 'Cores restauradas.' : 'Aplicado na tela, mas não salvo no servidor.', !ok);
+}
+
+async function resetAll(){
+  if(!confirm('Isso vai apagar sua meta, o período, os dias marcados, os valores e o histórico. Continuar?')) return;
+  try{
+    await window.storage.delete('sales-config');
+    await window.storage.delete('sales-totals');
+    await window.storage.delete('sales-history');
+    const p = defaultPeriod();
+    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS} };
+    totals = { pago: 0, aPagar: 0 };
+    history = [];
+    await saveConfig(); await saveTotals(); await saveHistory();
+    render();
+  }catch(e){
+    console.error('Erro ao apagar dados', e);
+  }finally{
+    showStatus('Dados apagados.', false);
+    document.getElementById('settingsPanel').classList.remove('open');
+  }
+}
+
+async function init(){
+  document.getElementById('toggleSettingsBtn').onclick = toggleSettings;
+  document.getElementById('marcarFinsDeSemanaBtn').onclick = marcarFinsDeSemana;
+  document.getElementById('saveColorsBtn').onclick = saveColors;
+  document.getElementById('resetColorsBtn').onclick = resetColors;
+  ['colorGold','colorTeal','colorCoral'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', (e)=>{
+      document.documentElement.style.setProperty('--'+id.replace('color','').toLowerCase(), e.target.value);
+    });
+  });
+
+  document.getElementById('comissaoSeTudoPago').onclick = () => {
+    copyElementText(document.getElementById('comissaoSeTudoPago'));
+  };
+  document.getElementById('copyComissaoIc').onclick = () => document.getElementById('comissaoSeTudoPago').click();
+  document.getElementById('shareBtn').onclick = openShareModal;
+  document.getElementById('closeShareBtn').onclick = closeShareModal;
+  document.getElementById('downloadShareBtn').onclick = downloadShareImage;
+  document.getElementById('copyShareTextBtn').onclick = copyShareText;
+  document.getElementById('shareModal').addEventListener('click', (e)=>{ if(e.target.id==='shareModal') closeShareModal(); });
+  document.getElementById('saveSettingsBtn').onclick = saveSettings;
+  document.getElementById('resetBtn').onclick = resetAll;
+  document.getElementById('updateValuesBtn').onclick = updateValues;
+  document.getElementById('toggleChartBtn').onclick = toggleChart;
+  document.getElementById('encerrarBtn').onclick = encerrarPeriodo;
+  document.getElementById('exportBtn').onclick = exportData;
+  document.getElementById('copyExportBtn').onclick = copyExport;
+  attachMoneyMask(document.getElementById('inPago'), 'pago');
+  attachMoneyMask(document.getElementById('inAPagar'), 'aPagar');
+  attachMoneyMask(document.getElementById('inMeta'));
+  ['heroFalta','statPago','statAPagar','statComissao','statComissaoAPagar','statCarteira','statProjecao']
+    .forEach(id => makeCopyable(document.getElementById(id)));
+  [document.getElementById('inPago'), document.getElementById('inAPagar')].forEach(el=>{
+    el.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); updateValues(); } });
+  });
+
+  await loadAll();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
