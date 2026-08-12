@@ -1467,6 +1467,12 @@ async function toggleDay(key){
 }
 
 function renderChart(m){
+  if(typeof Chart === 'undefined'){
+    console.error('Chart.js não carregou (biblioteca externa bloqueada ou sem conexão) — gráfico de evolução indisponível.');
+    const wrap = document.getElementById('chartWrap');
+    if(wrap) wrap.innerHTML = '<div class="chart-empty">Não consegui carregar o gráfico agora. O resto do painel funciona normalmente.</div>';
+    return;
+  }
   const days = enumerateDays(m.start, m.end);
   const labels = days.map(d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}`);
 
@@ -1932,7 +1938,10 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('dashboardRoot').style.display = 'block';
     document.getElementById('userEmail').textContent = user.email || user.displayName || '';
     document.getElementById('contaEmailDisplay').textContent = user.email || user.displayName || '';
-    if(!buttonsAlreadyBound){ await init(); buttonsAlreadyBound = true; }
+    if(!buttonsAlreadyBound){
+      try{ await init(); }catch(e){ console.error('Erro ao inicializar', e); }
+      buttonsAlreadyBound = true;
+    }
 
     const isAdmin = (user.email||'').trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
     document.getElementById('tabUsuariosBtn').style.display = isAdmin ? 'inline-block' : 'none';
@@ -1941,10 +1950,16 @@ onAuthStateChanged(auth, async (user) => {
 
     document.getElementById('loading').style.display = 'block';
     document.getElementById('app').style.display = 'none';
-    await loadAll();
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    render();
+    try{
+      await loadAll();
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      render();
+    }catch(e){
+      console.error('Erro ao carregar/renderizar painel', e);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    }
   } else {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('dashboardRoot').style.display = 'none';
