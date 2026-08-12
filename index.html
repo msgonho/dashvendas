@@ -26,6 +26,24 @@
   }
   .wrap{max-width:920px;margin:0 auto;}
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 4px;}
+  .top-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .top-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:2px;}
+  .theme-quick{display:flex;gap:6px;}
+  .theme-quick button{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer;padding:0;flex-shrink:0;}
+  .theme-quick button.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--text);}
+  .lang-select{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 8px;font-family:var(--mono);font-size:11px;cursor:pointer;}
+  .lang-select-full{width:100%;max-width:260px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px;cursor:pointer;}
+
+  .tabs-row{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;}
+  .tab-btn{background:none;border:none;color:var(--text-muted);font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .tab-btn:hover{color:var(--text);}
+
+  .theme-presets{display:flex;flex-wrap:wrap;gap:10px;}
+  .theme-preset-btn{display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;font-family:var(--sans);font-size:11px;color:var(--text-muted);transition:border-color .2s;min-width:88px;}
+  .theme-preset-btn:hover{border-color:var(--text-muted);}
+  .theme-preset-btn.active{border-color:var(--gold);color:var(--text);}
+  .theme-preset-swatch{width:26px;height:26px;border-radius:50%;}
   h1{font-family:var(--mono);font-size:26px;font-weight:700;margin:0 0 2px;letter-spacing:-.01em;}
   .period-line{color:var(--text-muted);font-size:13px;margin:0 0 18px;}
   .period-line button{background:none;border:1px solid var(--border);color:var(--gold);font-family:var(--sans);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;margin-left:8px;}
@@ -188,7 +206,6 @@
   #emptyHint{font-size:13px;color:var(--text-muted);line-height:1.5;}
   #emptyHint b{color:var(--text);}
 
-  .admin-add-row{display:flex;gap:8px;align-items:end;flex-wrap:wrap;}
   .periodo-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);flex-wrap:wrap;}
   .periodo-row:last-child{border-bottom:none;}
   .periodo-row.recent{background:rgba(212,175,55,.05);border-radius:6px;padding:8px 8px;margin:0 -8px;}
@@ -287,208 +304,127 @@
   .copy-flash.show{display:inline;}
   body.compact-mode .color-legend{display:none;}
   body.compact-mode #app > *:not(#heroCard){display:none !important;}
-
-  .user-bar{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:6px;font-size:12px;color:var(--text-muted);}
-
-  .login-screen{
-    position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:100;
-    overflow:hidden;background:var(--bg);
-  }
-  .login-grid{
-    position:absolute;inset:0;
-    background-image:
-      linear-gradient(rgba(212,175,55,.22) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(212,175,55,.22) 1px, transparent 1px);
-    background-size:54px 54px;
-    transform:perspective(500px) rotateX(62deg) scale(2.1);
-    transform-origin:center 25%;
-    animation:gridScroll 6s linear infinite;
-    -webkit-mask-image:linear-gradient(to top, #000 8%, transparent 70%);
-    mask-image:linear-gradient(to top, #000 8%, transparent 70%);
-  }
-  @keyframes gridScroll{ from{background-position:0 0;} to{background-position:0 54px;} }
-  .login-horizon{
-    position:absolute;left:50%;top:32%;width:640px;height:280px;transform:translate(-50%,-50%);
-    background:radial-gradient(closest-side, rgba(212,175,55,.30), transparent 75%);
-    filter:blur(30px);pointer-events:none;
-    animation:horizonPulse 4.5s ease-in-out infinite;
-  }
-  @keyframes horizonPulse{
-    0%,100%{opacity:.8; transform:translate(-50%,-50%) scale(1);}
-    50%{opacity:1; transform:translate(-50%,-50%) scale(1.08);}
-  }
-  .login-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,.6) 100%);pointer-events:none;}
-  .login-noise{
-    position:absolute;inset:0;opacity:.05;pointer-events:none;mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .login-card-wrap{
-    position:relative;z-index:1;max-width:380px;width:100%;border-radius:20px;padding:2px;overflow:hidden;
-    animation:cardIn .7s ease-out both;
-  }
-  @keyframes cardIn{ from{opacity:0;transform:translateY(14px) scale(.97);} to{opacity:1;transform:translateY(0) scale(1);} }
-  .login-card-wrap::before{
-    content:'';position:absolute;inset:-60%;
-    background:conic-gradient(from 0deg, transparent 0deg, var(--gold) 40deg, transparent 110deg, transparent 220deg, var(--teal) 270deg, transparent 340deg);
-    animation:borderSpin 5s linear infinite;
-  }
-  @keyframes borderSpin{ to{ transform:rotate(360deg); } }
-  .login-card{
-    position:relative;z-index:1;text-align:center;
-    background:rgba(13,16,20,.88);border-radius:18px;
-    padding:40px 30px 34px;
-    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    box-shadow:0 24px 70px rgba(0,0,0,.55);
-  }
-  .login-card > *{opacity:0;animation:fadeUp .55s ease-out forwards;}
-  .login-logo{margin-bottom:14px;filter:drop-shadow(0 0 10px rgba(212,175,55,.4));animation-delay:.05s;}
-  .login-card .eyebrow{display:flex;align-items:center;justify-content:center;gap:6px;animation-delay:.15s;}
-  .login-card h1{text-shadow:0 0 18px rgba(212,175,55,.35);animation-delay:.25s;}
-  .login-card .section-desc{margin:10px 0 0;animation-delay:.35s;}
-  .login-card .btn{margin-top:22px;width:100%;animation-delay:.45s;}
-  .login-card #loginError{animation-delay:.55s;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(9px);} to{opacity:1;transform:translateY(0);}}
-  .cursor-blink{color:var(--gold);animation:blink 1.1s steps(2) infinite;}
-  @keyframes blink{50%{opacity:0;}}
-  .login-card .btn.primary{
-    position:relative;overflow:hidden;background:linear-gradient(135deg, var(--gold), #eccb63);
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    box-shadow:0 0 18px rgba(212,175,55,.28);
-    transition:box-shadow .25s, transform .15s;
-  }
-  .login-card .btn-icon{flex-shrink:0;}
-  .login-card .btn.primary::after{
-    content:'';position:absolute;top:0;left:-60%;width:35%;height:100%;
-    background:linear-gradient(120deg, transparent, rgba(255,255,255,.45), transparent);
-    animation:shine 3.4s ease-in-out infinite;
-  }
-  @keyframes shine{ 0%{left:-60%;} 100%{left:140%;} }
-  .login-card .btn.primary:hover{box-shadow:0 0 30px rgba(212,175,55,.55);transform:translateY(-1px);}
-  .login-tag{
-    position:relative;z-index:1;text-align:center;margin-top:18px;
-    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--text-muted);opacity:.55;
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .login-grid, .login-card-wrap::before, .login-horizon, .cursor-blink, .login-card .btn.primary::after, .login-card > *{
-      animation:none !important;opacity:1;
-    }
-  }
 </style>
 </head>
 <body>
-<div id="loginScreen" class="login-screen">
-  <div class="login-grid"></div>
-  <div class="login-horizon"></div>
-  <div class="login-vignette"></div>
-  <div class="login-noise"></div>
-  <div class="login-card-wrap">
-    <div class="login-card">
-      <svg class="login-logo" width="36" height="36" viewBox="0 0 32 32">
-        <rect width="32" height="32" rx="8" fill="#171B22" stroke="#2A2F3A"/>
-        <path d="M6 22 L13 14 L18 18 L26 8" stroke="#D4AF37" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="26" cy="8" r="2.6" fill="#3DDC97"/>
-      </svg>
-      <p class="eyebrow">Acompanhamento de comissão <span class="cursor-blink">▮</span></p>
-      <h1>Painel de Vendas</h1>
-      <p class="section-desc">Entre com sua conta Google para acessar seus dados de qualquer lugar.</p>
-      <button class="btn primary" id="googleLoginBtn" type="button">
-        <svg class="btn-icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V4.5a2.5 2.5 0 0 1 5 0V7"/></svg>
-        Entrar com Google
-      </button>
-      <p class="field-note" style="opacity:.7;">Novo por aqui? O cadastro é automático — não existe uma etapa separada.</p>
-      <p class="field-note" id="loginError"></p>
+<div class="wrap">
+  <div class="top-bar">
+    <div>
+      <p class="eyebrow" data-i18n="eyebrow">Acompanhamento de comissão</p>
+      <h1 data-i18n="title">Painel de Vendas</h1>
+    </div>
+    <div class="top-controls">
+      <div class="theme-quick" id="themeQuick" title="Tema de cores"></div>
+      <select id="langSelect" class="lang-select" title="Idioma">
+        <option value="pt">PT-BR</option>
+        <option value="es">ES</option>
+        <option value="en">EN</option>
+      </select>
     </div>
   </div>
-  <p class="login-tag">painel de vendas · dados na nuvem</p>
-</div>
-<div class="wrap" id="dashboardRoot" style="display:none;">
-  <div class="user-bar"><span id="userEmail"></span><button class="btn ghost" id="logoutBtn" type="button">Sair</button></div>
-  <p class="eyebrow">Acompanhamento de comissão</p>
-  <h1>Painel de Vendas</h1>
-  <p class="field-note" style="margin:2px 0 14px;">☁ Salvo na nuvem (Firebase) — acesse de qualquer aparelho com a mesma conta Google.</p>
+  <p class="field-note" id="storageNote" style="margin:2px 0 14px;">☁ <span data-i18n="storageNoteClaude">Salvo automaticamente aqui no Claude — abra esta mesma conversa em qualquer aparelho pra ver os mesmos dados.</span></p>
   <div class="status-banner" id="statusBanner" aria-live="polite" role="status"></div>
   <p class="period-line" id="periodLine">Carregando período...
-    <button id="toggleSettingsBtn" type="button">Definir minha meta</button>
+    <button id="toggleSettingsBtn" type="button" data-i18n="btnSettings">Configurações</button>
   </p>
 
   <div class="color-legend">
-    <span><i class="dot" style="background:var(--coral)"></i>Atrasado</span>
-    <span><i class="dot" style="background:#ff9e42"></i>Atenção</span>
-    <span><i class="dot" style="background:var(--teal)"></i>No ritmo</span>
-    <span><i class="dot" style="background:var(--gold)"></i>Meta batida</span>
+    <span><i class="dot" style="background:var(--coral)"></i><span data-i18n="legendLate">Atrasado</span></span>
+    <span><i class="dot" style="background:#ff9e42"></i><span data-i18n="legendWarn">Atenção</span></span>
+    <span><i class="dot" style="background:var(--teal)"></i><span data-i18n="legendPace">No ritmo</span></span>
+    <span><i class="dot" style="background:var(--gold)"></i><span data-i18n="legendDone">Meta batida</span></span>
   </div>
 
   <div class="card" id="settingsPanel">
-    <div class="settings-grid">
-      <div class="field">
-        <label>Minha meta (R$)</label>
-        <div class="input-wrap money"><span class="prefix">R$</span><input type="number" id="inMeta" min="0" step="100"></div>
-      </div>
-      <div class="field">
-        <label>Meta exigida pela empresa (R$)</label>
-        <div class="input-wrap money"><span class="prefix">R$</span><input type="number" id="inMetaOficial" value="100000" disabled></div>
-        <p class="field-note">Fixa — só de referência.</p>
-      </div>
-      <div class="field">
-        <label>Comissão</label>
-        <div class="input-wrap percent"><input type="number" id="inComissao" min="0" max="100" step="0.5"><span class="suffix">%</span></div>
-        <p class="field-note">Mudar aqui recalcula todo o histórico com a taxa nova — não guarda a taxa antiga.</p>
-      </div>
-      <div class="field"><label>Início do período apurado</label><input type="date" id="inInicio"></div>
-      <div class="field"><label>Fim do período apurado</label><input type="date" id="inFim"></div>
+    <div class="tabs-row" id="settingsTabs">
+      <button class="tab-btn active" data-tab="geral" type="button" data-i18n="tabGeral">Geral</button>
+      <button class="tab-btn" data-tab="temas" type="button" data-i18n="tabTemas">Temas</button>
+      <button class="tab-btn" data-tab="usuarios" id="tabUsuariosBtn" type="button" data-i18n="tabUsuarios" style="display:none;">Usuários</button>
+      <button class="tab-btn" data-tab="dados" type="button" data-i18n="tabDados">Dados</button>
+      <button class="tab-btn" data-tab="conta" id="tabContaBtn" type="button" data-i18n="tabConta" style="display:none;">Conta</button>
     </div>
 
-    <div class="calendar-block">
-      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--gold);">▦</span>Período apurado — dias trabalhados</h2>
-      <p class="field-note">Clique em um dia para marcá-lo como não trabalhado (folga, falta, fim de semana). Esses dias saem da conta do ritmo diário.</p>
-      <button class="btn ghost" id="marcarFinsDeSemanaBtn" type="button" style="font-size:11px;padding:5px 10px;margin-bottom:10px;">Marcar sábados e domingos como folga</button>
-      <div id="calendarContainer"></div>
-      <div class="cal-legend">
-        <span><i class="dot work"></i> Trabalhado</span>
-        <span><i class="dot off"></i> Não trabalhado (clique p/ voltar)</span>
-      </div>
-    </div>
-
-    <div class="calendar-block" id="adminPanel" style="display:none;">
-      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--gold);">◆</span>Administrar acesso</h2>
-      <p class="field-note">Só a sua conta (admin) vê essa seção. Libere ou remova e-mails que podem entrar no painel — cada um com os próprios dados, isolados dos seus.</p>
-      <div class="admin-add-row">
-        <div class="field" style="flex:2;"><label>E-mail pra liberar</label><input type="email" id="newAllowedEmail" placeholder="nome@gmail.com"></div>
-        <button class="btn primary" id="addAllowedEmailBtn" type="button" style="height:38px;">Adicionar</button>
-      </div>
-      <div id="allowedUsersList" style="margin-top:10px;">Carregando...</div>
-    </div>
-
-    <div class="calendar-block">
-      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--gold);">◐</span>Personalizar cores</h2>
+    <div class="tab-panel" id="tabPanelGeral">
       <div class="settings-grid">
-        <div class="field"><label>Cor de destaque (meta)</label><input type="color" id="colorGold" value="#D4AF37"></div>
-        <div class="field"><label>Cor de sucesso (no ritmo)</label><input type="color" id="colorTeal" value="#3DDC97"></div>
-        <div class="field"><label>Cor de alerta (atrasado)</label><input type="color" id="colorCoral" value="#FF6B5E"></div>
+        <div class="field">
+          <label data-i18n="fieldMyGoal">Minha meta (R$)</label>
+          <div class="input-wrap money"><span class="prefix">R$</span><input type="number" id="inMeta" min="0" step="100"></div>
+        </div>
+        <div class="field">
+          <label data-i18n="fieldRequiredGoal">Meta exigida pela empresa (R$)</label>
+          <div class="input-wrap money"><span class="prefix">R$</span><input type="number" id="inMetaOficial" value="100000" disabled></div>
+          <p class="field-note" data-i18n="fieldRequiredGoalNote">Fixa — só de referência.</p>
+        </div>
+        <div class="field">
+          <label data-i18n="fieldCommission">Comissão</label>
+          <div class="input-wrap percent"><input type="number" id="inComissao" min="0" max="100" step="0.5"><span class="suffix">%</span></div>
+          <p class="field-note" data-i18n="fieldCommissionNote">Mudar aqui recalcula todo o histórico com a taxa nova — não guarda a taxa antiga.</p>
+        </div>
+        <div class="field"><label data-i18n="fieldPeriodStart">Início do período apurado</label><input type="date" id="inInicio"></div>
+        <div class="field"><label data-i18n="fieldPeriodEnd">Fim do período apurado</label><input type="date" id="inFim"></div>
+      </div>
+
+      <div class="calendar-block">
+        <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--gold);">▦</span><span data-i18n="calendarTitle">Período apurado — dias trabalhados</span></h2>
+        <p class="field-note" data-i18n="calendarDesc">Clique em um dia para marcá-lo como não trabalhado (folga, falta, fim de semana). Esses dias saem da conta do ritmo diário.</p>
+        <button class="btn ghost" id="marcarFinsDeSemanaBtn" type="button" style="font-size:11px;padding:5px 10px;margin-bottom:10px;" data-i18n="btnMarkWeekends">Marcar sábados e domingos como folga</button>
+        <div id="calendarContainer"></div>
+        <div class="cal-legend">
+          <span><i class="dot work"></i> <span data-i18n="calLegendWork">Trabalhado</span></span>
+          <span><i class="dot off"></i> <span data-i18n="calLegendOff">Não trabalhado (clique p/ voltar)</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tabPanelTemas" style="display:none;">
+      <h2 class="section-title" style="margin-top:0;" data-i18n="themePresetsTitle">Temas prontos</h2>
+      <div class="theme-presets" id="themePresetsList"></div>
+
+      <h2 class="section-title" style="margin-top:24px;" data-i18n="customColorsTitle">Cores personalizadas</h2>
+      <div class="settings-grid">
+        <div class="field"><label data-i18n="colorGoldLabel">Cor de destaque (meta)</label><input type="color" id="colorGold" value="#D4AF37"></div>
+        <div class="field"><label data-i18n="colorTealLabel">Cor de sucesso (no ritmo)</label><input type="color" id="colorTeal" value="#3DDC97"></div>
+        <div class="field"><label data-i18n="colorCoralLabel">Cor de alerta (atrasado)</label><input type="color" id="colorCoral" value="#FF6B5E"></div>
       </div>
       <div class="btn-row" style="margin-top:12px;">
-        <button class="btn primary" id="saveColorsBtn" type="button" style="font-size:12px;padding:7px 14px;">Salvar cores</button>
-        <button class="btn ghost" id="resetColorsBtn" type="button" style="font-size:12px;padding:7px 14px;">Restaurar padrão</button>
+        <button class="btn primary" id="saveColorsBtn" type="button" style="font-size:12px;padding:7px 14px;" data-i18n="btnSaveColors">Salvar cores</button>
+        <button class="btn ghost" id="resetColorsBtn" type="button" style="font-size:12px;padding:7px 14px;" data-i18n="btnResetColors">Restaurar padrão</button>
+      </div>
+
+      <h2 class="section-title" style="margin-top:24px;" data-i18n="languageTitle">Idioma</h2>
+      <select id="langSelectSettings" class="lang-select-full">
+        <option value="pt">Português (Brasil)</option>
+        <option value="es">Español</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <div class="tab-panel" id="tabPanelUsuarios" style="display:none;">
+      <p class="field-note" data-i18n="adminNote">Só a sua conta (admin) vê essa seção.</p>
+    </div>
+
+    <div class="tab-panel" id="tabPanelDados" style="display:none;">
+      <div class="calendar-block" style="margin-top:0;">
+        <h2 class="section-title" style="margin-top:0;"><span class="ic" style="color:var(--text-muted);">↻</span><span data-i18n="pastPeriodsTitle">Períodos anteriores</span></h2>
+        <div id="periodosList">Carregando...</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn ghost" id="encerrarBtn" type="button" data-i18n="btnClosePeriod">Encerrar este período</button>
+        <button class="btn ghost" id="exportBtn" type="button" data-i18n="btnExport">Exportar dados (backup)</button>
+      </div>
+      <button class="btn-danger-link" id="resetBtn" type="button" data-i18n="btnResetAll">Apagar todos os dados</button>
+      <div id="exportArea" style="display:none;margin-top:12px;">
+        <textarea id="exportText" readonly style="width:100%;min-height:120px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:var(--mono);font-size:11px;"></textarea>
+        <button class="btn ghost" id="copyExportBtn" type="button" style="margin-top:8px;" data-i18n="btnCopy">Copiar</button>
+        <p class="field-note" data-i18n="exportNote">Cole e guarde esse texto em algum lugar (bloco de notas, e-mail pra você mesmo). Se um dia os dados aqui se perderem, é só colar de volta manualmente nos campos.</p>
       </div>
     </div>
 
-    <div class="calendar-block">
-      <h2 class="section-title" style="margin-top:20px;"><span class="ic" style="color:var(--text-muted);">↻</span>Períodos anteriores</h2>
-      <div id="periodosList">Carregando...</div>
-    </div>
+    <div class="tab-panel" id="tabPanelConta" style="display:none;"></div>
 
-    <div class="btn-row">
-      <button class="btn primary" id="saveSettingsBtn" type="button">Salvar</button>
-      <button class="btn ghost" id="encerrarBtn" type="button">Encerrar este período</button>
-      <button class="btn ghost" id="exportBtn" type="button">Exportar dados (backup)</button>
-    </div>
-    <button class="btn-danger-link" id="resetBtn" type="button">Apagar todos os dados</button>
-    <div id="exportArea" style="display:none;margin-top:12px;">
-      <textarea id="exportText" readonly style="width:100%;min-height:120px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:var(--mono);font-size:11px;"></textarea>
-      <button class="btn ghost" id="copyExportBtn" type="button" style="margin-top:8px;">Copiar</button>
-      <p class="field-note">Cole e guarde esse texto em algum lugar (bloco de notas, e-mail pra você mesmo). Se um dia os dados aqui se perderem, é só colar de volta manualmente nos campos.</p>
+    <div class="btn-row" style="margin-top:22px;padding-top:16px;border-top:1px solid var(--border);">
+      <button class="btn primary" id="saveSettingsBtn" type="button" data-i18n="btnSave">Salvar</button>
     </div>
   </div>
 
@@ -505,7 +441,7 @@
 
     <div class="card" id="emptyHint" style="display:none;">
       <span class="ic" style="color:var(--gold);">✦</span>
-      Primeira vez aqui? Defina sua meta em <b>"Definir minha meta"</b> e atualize seus valores em <b>"Suas vendas"</b>, aqui abaixo, para começar a acompanhar.
+      <span data-i18n="emptyHintText">Primeira vez aqui? Defina sua meta em <b>"Configurações"</b> e atualize seus valores em <b>"Suas vendas"</b>, aqui abaixo, para começar a acompanhar.</span>
     </div>
 
     <div class="card" id="heroCard">
@@ -525,7 +461,7 @@
             <circle id="donutCap" r="4" fill="var(--gold)"><title>Você está aqui</title></circle>
           </svg>
           <div class="donut-center">
-            <p class="hero-label">Falta p/ meta</p>
+            <p class="hero-label" data-i18n="heroLabelGoal">Falta p/ meta</p>
             <p class="hero-number" id="heroFalta">R$ 0</p>
           </div>
         </div>
@@ -538,10 +474,10 @@
         <p class="min-note" id="minNote"></p>
         <span class="pill" id="pacePill">—</span>
         <br>
-        <button class="btn ghost" id="shareBtn" type="button" style="font-size:11px;padding:5px 12px;margin-top:6px;">↗ Compartilhar resumo</button>
+        <button class="btn ghost" id="shareBtn" type="button" style="font-size:11px;padding:5px 12px;margin-top:6px;">↗ <span data-i18n="btnShare">Compartilhar resumo</span></button>
       </div>
 
-      <h3 class="ritmo-title"><span class="ic" style="color:var(--gold);">◷</span>Ritmo do período</h3>
+      <h3 class="ritmo-title"><span class="ic" style="color:var(--gold);">◷</span><span data-i18n="paceTitle">Ritmo do período</span></h3>
       <div class="gauge-track" id="gaugeTrack">
         <div class="gauge-fill" id="gaugeFill" style="width:0%"></div>
         <div class="gauge-marker" id="gaugeMarker" style="left:0%"></div>
@@ -554,19 +490,19 @@
       <p class="ritmo-line" id="ritmoAtual"></p>
     </div>
 
-    <h2 class="section-title"><span class="ic" style="color:var(--teal);">$</span>Suas vendas</h2>
-    <p class="section-desc">Atualize com os valores que aparecem no site da empresa — sem precisar lançar venda por venda.</p>
+    <h2 class="section-title"><span class="ic" style="color:var(--teal);">$</span><span data-i18n="salesTitle">Suas vendas</span></h2>
+    <p class="section-desc" data-i18n="salesDesc">Atualize com os valores que aparecem no site da empresa — sem precisar lançar venda por venda.</p>
     <div class="card" id="vendasCard">
       <div class="values-grid">
         <div class="value-field pago">
-          <label><span class="value-icon">●</span> Total vendas pagas <span class="unsaved-badge" id="pagoUnsavedBadge" style="display:none;">· não salvo</span></label>
+          <label><span class="value-icon">●</span> <span data-i18n="fieldPaidSales">Total vendas pagas</span> <span class="unsaved-badge" id="pagoUnsavedBadge" style="display:none;" data-i18n="unsavedBadge">· não salvo</span></label>
           <div class="input-wrap money edit-wrap"><span class="prefix">R$</span><input type="number" id="inPago" min="0" step="0.01" placeholder="0,00"><span class="edit-ic">✎</span></div>
-          <p class="field-note">Os clientes já pagaram essas vendas</p>
+          <p class="field-note" data-i18n="fieldPaidSalesNote">Os clientes já pagaram essas vendas</p>
         </div>
         <div class="value-field apagar">
-          <label><span class="value-icon">●</span> Total vendas a pagar <span class="unsaved-badge" id="apagarUnsavedBadge" style="display:none;">· não salvo</span></label>
+          <label><span class="value-icon">●</span> <span data-i18n="fieldPendingSales">Total vendas a pagar</span> <span class="unsaved-badge" id="apagarUnsavedBadge" style="display:none;" data-i18n="unsavedBadge">· não salvo</span></label>
           <div class="input-wrap money edit-wrap"><span class="prefix">R$</span><input type="number" id="inAPagar" min="0" step="0.01" placeholder="0,00"><span class="edit-ic">✎</span></div>
-          <p class="field-note">Vendas fechadas, aguardando pagamento dos clientes</p>
+          <p class="field-note" data-i18n="fieldPendingSalesNote">Vendas fechadas, aguardando pagamento dos clientes</p>
         </div>
       </div>
       <div class="split-bar">
@@ -578,31 +514,31 @@
         <span><i class="dot coral"></i><span id="splitAPagarLabel">A pagar: R$0 (0%)</span></span>
       </div>
       <div class="update-row">
-        <button class="btn primary" id="updateValuesBtn" type="button">Atualizar valores</button>
+        <button class="btn primary" id="updateValuesBtn" type="button" data-i18n="btnUpdateValues">Atualizar valores</button>
         <p class="field-note" id="lastUpdateNote"></p>
       </div>
       <div class="commission-footer">
-        <p class="cf-main"><span class="ic" style="color:var(--gold);">✦</span> Se tudo for pago, sua comissão total é <b id="comissaoSeTudoPago" style="cursor:pointer;" title="Clique pra copiar">R$ 0</b> <span class="ic copy-ic" id="copyComissaoIc" style="color:var(--text-muted);font-size:11px;cursor:pointer;" title="Clique no valor pra copiar">⧉</span></p>
+        <p class="cf-main"><span class="ic" style="color:var(--gold);">✦</span> <span data-i18n="commissionFooterText">Se tudo for pago, sua comissão total é</span> <b id="comissaoSeTudoPago" style="cursor:pointer;" title="Clique pra copiar">R$ 0</b> <span class="ic copy-ic" id="copyComissaoIc" style="color:var(--text-muted);font-size:11px;cursor:pointer;" title="Clique no valor pra copiar">⧉</span></p>
         <p class="cf-sub" id="comissaoSeTudoPagoSub"></p>
       </div>
     </div>
 
-    <h2 class="section-title"><span class="ic" style="color:var(--text-muted);">▤</span>Resumo do período</h2>
+    <h2 class="section-title"><span class="ic" style="color:var(--text-muted);">▤</span><span data-i18n="summaryTitle">Resumo do período</span></h2>
     <div class="stats-grid">
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--teal);">✓</span> Pago</div><div class="value teal" id="statPago">R$0</div></div>
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--coral);">○</span> A pagar</div><div class="value coral" id="statAPagar">R$0</div></div>
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--gold);">$</span> Comissão garantida</div><div class="value gold" id="statComissao">R$0</div></div>
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">$</span> Comissão a receber</div><div class="value" id="statComissaoAPagar">R$0</div></div>
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">Σ</span> Total em carteira</div><div class="value" id="statCarteira">R$0</div></div>
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">◷</span> Dias de trabalho restantes</div><div class="value" id="statDiasRest">0</div></div>
-      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">→</span> Projeção de fechamento</div><div class="value" id="statProjecao">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--teal);">✓</span> <span data-i18n="statPaidLabel">Pago</span></div><div class="value teal" id="statPago">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--coral);">○</span> <span data-i18n="statPendingLabel">A pagar</span></div><div class="value coral" id="statAPagar">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--gold);">$</span> <span data-i18n="statCommissionLabel">Comissão garantida</span></div><div class="value gold" id="statComissao">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">$</span> <span data-i18n="statCommissionPendingLabel">Comissão a receber</span></div><div class="value" id="statComissaoAPagar">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">Σ</span> <span data-i18n="statWalletLabel">Total em carteira</span></div><div class="value" id="statCarteira">R$0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">◷</span> <span data-i18n="statDaysLeftLabel">Dias de trabalho restantes</span></div><div class="value" id="statDiasRest">0</div></div>
+      <div class="stat"><div class="label"><span class="ic" style="color:var(--text-muted);">→</span> <span data-i18n="statProjectionLabel">Projeção de fechamento</span></div><div class="value" id="statProjecao">R$0</div></div>
     </div>
 
     <h2 class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
-      <span><span class="ic" style="color:var(--gold);">↗</span>Evolução no período</span>
-      <button class="btn ghost" id="toggleChartBtn" type="button" style="font-size:11px;padding:4px 10px;">Mostrar</button>
+      <span><span class="ic" style="color:var(--gold);">↗</span><span data-i18n="evolutionTitle">Evolução no período</span></span>
+      <button class="btn ghost" id="toggleChartBtn" type="button" style="font-size:11px;padding:4px 10px;" data-i18n="btnShow">Mostrar</button>
     </h2>
-    <p class="section-desc">Linha pontilhada: ritmo ideal para bater sua meta (só avança em dias trabalhados). Linha sólida dourada: seu total pago acumulado, registrado a cada vez que você atualiza os valores acima.</p>
+    <p class="section-desc" data-i18n="evolutionDesc">Linha pontilhada: ritmo ideal para bater sua meta (só avança em dias trabalhados). Linha sólida dourada: seu total pago acumulado, registrado a cada vez que você atualiza os valores acima.</p>
     <div class="card" id="chartCard" style="display:none;"><div class="chart-wrap" id="chartWrap"><canvas id="chart" aria-label="Gráfico de evolução: ritmo ideal comparado ao total pago acumulado no período" role="img"></canvas></div></div>
 
   </div>
@@ -614,7 +550,7 @@
       <div class="share-topbar" id="shareTopbar"></div>
       <div class="share-brand">
         <svg width="18" height="18" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0F1115"/><path d="M6 22 L13 14 L18 18 L26 8" stroke="#D4AF37" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="8" r="2.6" fill="#3DDC97"/></svg>
-        <span class="share-brand-name">Painel de Vendas</span>
+        <span class="share-brand-name" data-i18n="title">Painel de Vendas</span>
       </div>
       <div class="share-period" id="sharePeriod">—</div>
 
@@ -627,7 +563,7 @@
         </svg>
         <div class="share-ring-center">
           <div class="share-pct" id="sharePct">0%</div>
-          <div class="share-pct-label">da meta</div>
+          <div class="share-pct-label" data-i18n="shareOfGoal">da meta</div>
         </div>
       </div>
 
@@ -635,125 +571,28 @@
 
       <div class="share-stats">
         <div class="share-chip teal">
-          <span class="share-stat-label">Realizado</span>
+          <span class="share-stat-label" data-i18n="shareRealizedLabel">Realizado</span>
           <span class="share-stat-value" id="shareRealizado">R$0</span>
         </div>
         <div class="share-chip">
-          <span class="share-stat-label">Meta</span>
+          <span class="share-stat-label" data-i18n="shareGoalLabel">Meta</span>
           <span class="share-stat-value" id="shareMeta">R$0</span>
         </div>
       </div>
 
       <div class="share-highlight" id="shareFalta"></div>
-      <div class="share-footer">Painel de Vendas · <span id="shareData"></span></div>
+      <div class="share-footer"><span data-i18n="title">Painel de Vendas</span> · <span id="shareData"></span></div>
     </div>
 
     <div class="share-actions">
-      <button class="btn primary" id="downloadShareBtn" type="button">Baixar imagem</button>
-      <button class="btn ghost" id="copyShareTextBtn" type="button">Copiar texto</button>
-      <button class="btn ghost" id="closeShareBtn" type="button">Fechar</button>
+      <button class="btn primary" id="downloadShareBtn" type="button" data-i18n="btnDownloadImage">Baixar imagem</button>
+      <button class="btn ghost" id="copyShareTextBtn" type="button" data-i18n="btnCopyText">Copiar texto</button>
+      <button class="btn ghost" id="closeShareBtn" type="button" data-i18n="btnClose">Fechar</button>
     </div>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc, deleteField, collection, getDocs }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBnntgfNb_ZpgYoj1frHkaYrvJ2pH5Mf8o",
-  authDomain: "painel-vendas-171bf.firebaseapp.com",
-  projectId: "painel-vendas-171bf",
-  storageBucket: "painel-vendas-171bf.firebasestorage.app",
-  messagingSenderId: "761890531020",
-  appId: "1:761890531020:web:64b7aacf75b917af4cc469"
-};
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
-
-// >>> Sua conta admin — sempre tem acesso, e é quem consegue liberar/remover outras contas <<<
-const ADMIN_EMAIL = "ederson974@gmail.com";
-
-async function isAllowedEmail(email){
-  if(email === ADMIN_EMAIL) return true;
-  try{
-    const snap = await getDoc(doc(db, 'allowedUsers', email));
-    return snap.exists();
-  }catch(e){ console.error('Erro ao checar permissão', e); return false; }
-}
-
-async function loadAllowedUsers(){
-  const listEl = document.getElementById('allowedUsersList');
-  if(!listEl) return;
-  listEl.innerHTML = 'Carregando...';
-  try{
-    const snap = await getDocs(collection(db, 'allowedUsers'));
-    if(snap.empty){ listEl.innerHTML = '<p class="field-note">Nenhum e-mail liberado ainda (além do seu, que é admin).</p>'; return; }
-    listEl.innerHTML = '';
-    snap.forEach(docSnap=>{
-      const row = document.createElement('div');
-      row.className = 'periodo-row';
-      row.innerHTML = `<span>${docSnap.id}</span><span class="valores"><button class="del-periodo" type="button" title="Remover acesso">✕</button></span>`;
-      row.querySelector('.del-periodo').onclick = () => removeAllowedUser(docSnap.id);
-      listEl.appendChild(row);
-    });
-  }catch(e){
-    console.error('Erro ao carregar usuários liberados', e);
-    listEl.innerHTML = '<p class="field-note">Não consegui carregar a lista agora.</p>';
-  }
-}
-
-async function addAllowedUser(){
-  const input = document.getElementById('newAllowedEmail');
-  const email = input.value.trim().toLowerCase();
-  if(!email || !email.includes('@')){ showStatus('Digite um e-mail válido.', true); return; }
-  try{
-    await setDoc(doc(db, 'allowedUsers', email), { addedAt: new Date().toISOString(), addedBy: ADMIN_EMAIL });
-    input.value = '';
-    showStatus('E-mail liberado: ' + email, false);
-    loadAllowedUsers();
-  }catch(e){
-    console.error('Erro ao adicionar usuário', e);
-    showStatus('Não consegui adicionar agora.', true);
-  }
-}
-
-async function removeAllowedUser(email){
-  if(!confirm(`Remover o acesso de ${email}?`)) return;
-  try{
-    await deleteDoc(doc(db, 'allowedUsers', email));
-    showStatus('Acesso removido: ' + email, false);
-    loadAllowedUsers();
-  }catch(e){
-    console.error('Erro ao remover usuário', e);
-    showStatus('Não consegui remover agora.', true);
-  }
-}
-
-// Faz window.storage.get/set/delete conversarem com o Firestore, com a mesma
-// "cara" do armazenamento do Claude — nada mais no código precisa mudar.
-function userDocRef(){ return doc(db, 'usuarios', auth.currentUser.uid); }
-window.storage = {
-  async get(key){
-    const snap = await getDoc(userDocRef());
-    const data = snap.exists() ? snap.data() : {};
-    if(data[key] === undefined) throw new Error('key not found: ' + key);
-    return { key, value: data[key], shared: false };
-  },
-  async set(key, value){
-    await setDoc(userDocRef(), { [key]: value }, { merge: true });
-    return { key, value, shared: false };
-  },
-  async delete(key){
-    await setDoc(userDocRef(), { [key]: deleteField() }, { merge: true });
-    return { key, deleted: true, shared: false };
-  }
-};
-
+<script>
 let config = null;
 let totals = { pago: 0, aPagar: 0 };
 let history = [];
@@ -762,6 +601,218 @@ let chartInstance = null;
 let isDirty = false;
 const META_OFICIAL = 100000;
 const DEFAULT_COLORS = { gold:'#D4AF37', teal:'#3DDC97', coral:'#FF6B5E' };
+
+const TRANSLATIONS = {
+  pt: {
+    eyebrow:'Acompanhamento de comissão', title:'Painel de Vendas', btnSettings:'Configurações',
+    legendLate:'Atrasado', legendWarn:'Atenção', legendPace:'No ritmo', legendDone:'Meta batida',
+    tabGeral:'Geral', tabTemas:'Temas', tabUsuarios:'Usuários', tabDados:'Dados', tabConta:'Conta', btnViewAll:'Ver tudo', btnCompactMode:'Modo compacto',
+    fieldMyGoal:'Minha meta (R$)', fieldRequiredGoal:'Meta exigida pela empresa (R$)', fieldRequiredGoalNote:'Fixa — só de referência.',
+    fieldCommission:'Comissão', fieldCommissionNote:'Mudar aqui recalcula todo o histórico com a taxa nova — não guarda a taxa antiga.',
+    fieldPeriodStart:'Início do período apurado', fieldPeriodEnd:'Fim do período apurado',
+    calendarTitle:'Período apurado — dias trabalhados', calendarDesc:'Clique em um dia para marcá-lo como não trabalhado (folga, falta, fim de semana). Esses dias saem da conta do ritmo diário.',
+    btnMarkWeekends:'Marcar sábados e domingos como folga', calLegendWork:'Trabalhado', calLegendOff:'Não trabalhado (clique p/ voltar)',
+    themePresetsTitle:'Temas prontos', customColorsTitle:'Cores personalizadas',
+    colorGoldLabel:'Cor de destaque (meta)', colorTealLabel:'Cor de sucesso (no ritmo)', colorCoralLabel:'Cor de alerta (atrasado)',
+    btnSaveColors:'Salvar cores', btnResetColors:'Restaurar padrão', languageTitle:'Idioma',
+    adminNote:'Só a sua conta (admin) vê essa seção.', pastPeriodsTitle:'Períodos anteriores',
+    btnClosePeriod:'Encerrar este período', btnExport:'Exportar dados (backup)', btnResetAll:'Apagar todos os dados',
+    btnCopy:'Copiar', exportNote:'Cole e guarde esse texto em algum lugar (bloco de notas, e-mail pra você mesmo). Se um dia os dados aqui se perderem, é só colar de volta manualmente nos campos.',
+    btnSave:'Salvar', heroLabelGoal:'Falta p/ meta', paceTitle:'Ritmo do período',
+    salesTitle:'Suas vendas', salesDesc:'Atualize com os valores que aparecem no site da empresa — sem precisar lançar venda por venda.',
+    fieldPaidSales:'Total vendas pagas', unsavedBadge:'· não salvo', fieldPaidSalesNote:'Os clientes já pagaram essas vendas',
+    fieldPendingSales:'Total vendas a pagar', fieldPendingSalesNote:'Vendas fechadas, aguardando pagamento dos clientes',
+    btnUpdateValues:'Atualizar valores', commissionFooterText:'Se tudo for pago, sua comissão total é',
+    btnShare:'Compartilhar resumo', summaryTitle:'Resumo do período',
+    statPaidLabel:'Pago', statPendingLabel:'A pagar', statCommissionLabel:'Comissão garantida', statCommissionPendingLabel:'Comissão a receber',
+    statWalletLabel:'Total em carteira', statDaysLeftLabel:'Dias de trabalho restantes', statProjectionLabel:'Projeção de fechamento',
+    evolutionTitle:'Evolução no período', btnShow:'Mostrar', btnHide:'Ocultar',
+    evolutionDesc:'Linha pontilhada: ritmo ideal para bater sua meta (só avança em dias trabalhados). Linha sólida dourada: seu total pago acumulado, registrado a cada vez que você atualiza os valores acima.',
+    emptyHintText:'Primeira vez aqui? Defina sua meta em <b>"Configurações"</b> e atualize seus valores em <b>"Suas vendas"</b>, aqui abaixo, para começar a acompanhar.',
+    shareOfGoal:'da meta', shareRealizedLabel:'Realizado', shareGoalLabel:'Meta',
+    btnDownloadImage:'Baixar imagem', btnCopyText:'Copiar texto', btnClose:'Fechar',
+    periodLabel:'Período apurado', commissionLabel:'Comissão', goalMetLabel:'Meta batida!',
+    myGoalLine:'Minha meta', paidSoFarLine:'Já pago', requiredMinLabel:'Mínimo exigido pela empresa',
+    minMetSuffix:'já batido', payToday:'No ritmo', behindPace:'Atrás do ritmo',
+    idealToday:'Ideal', realizedLabel:'Realizado', lastUpdateLabel:'Última atualização', neverUpdated:'Ainda sem atualização registrada',
+    goalMetLong:'Você já garantiu a sua meta neste período. 👏', dailyPaceNeed:'Para manter o ritmo, você precisa vender', perDayWorked:'por dia nos', workDaysLeft:'dia(s) de trabalho restantes.',
+    avgPaceIs:'Seu ritmo médio atual é de', perDayWorkedShort:'/dia trabalhado (', daysElapsed:'dia(s) decorridos).',
+    metaBatida:'meta batida', metaNaoBatida:'não bateu', noHistoryYet:'Ainda não há histórico suficiente pra desenhar a evolução — atualize seus valores em dias diferentes e essa curva vai se formando sozinha.',
+    vsLastPeriod:'vs. período anterior', noPeriodsYet:'Aún no hay ningún período cerrado.', accumulatedTotal:'Total acumulado', inCommissionLabel:'en comisión, en', periodsClosedLabel:'período(s) cerrado(s).', goalMetShort:'¡Meta cumplida en este período!', leftToGoal:'Faltan', toReachGoal:'para alcanzar la meta', storageNoteClaude:'Guardado automáticamente aquí en Claude — abre esta misma conversación en cualquier dispositivo para ver los mismos datos.', storageNoteFirebase:'Guardado en la nube (Firebase) — accede desde cualquier dispositivo con la misma cuenta de Google.', noPeriodsYet:'Nenhum período encerrado ainda.', accumulatedTotal:'Total acumulado', inCommissionLabel:'em comissão, em', periodsClosedLabel:'período(s) encerrado(s).', goalMetShort:'Meta batida neste período!', leftToGoal:'Faltam', toReachGoal:'pra bater a meta', storageNoteClaude:'Salvo automaticamente aqui no Claude — abra esta mesma conversa em qualquer aparelho pra ver os mesmos dados.', storageNoteFirebase:'Salvo na nuvem (Firebase) — acesse de qualquer aparelho com a mesma conta Google.',
+  },
+  es: {
+    eyebrow:'Seguimiento de comisión', title:'Panel de Ventas', btnSettings:'Configuración',
+    legendLate:'Atrasado', legendWarn:'Atención', legendPace:'A tiempo', legendDone:'Meta cumplida',
+    tabGeral:'General', tabTemas:'Temas', tabUsuarios:'Usuarios', tabDados:'Datos', tabConta:'Cuenta', btnViewAll:'Ver todo', btnCompactMode:'Modo compacto',
+    fieldMyGoal:'Mi meta (R$)', fieldRequiredGoal:'Meta exigida por la empresa (R$)', fieldRequiredGoalNote:'Fija — solo de referencia.',
+    fieldCommission:'Comisión', fieldCommissionNote:'Cambiar esto recalcula todo el historial con la nueva tasa — no guarda la tasa anterior.',
+    fieldPeriodStart:'Inicio del período', fieldPeriodEnd:'Fin del período',
+    calendarTitle:'Período — días trabajados', calendarDesc:'Haz clic en un día para marcarlo como no trabajado (descanso, falta, fin de semana). Esos días salen del cálculo del ritmo diario.',
+    btnMarkWeekends:'Marcar sábados y domingos como descanso', calLegendWork:'Trabajado', calLegendOff:'No trabajado (clic para volver)',
+    themePresetsTitle:'Temas predefinidos', customColorsTitle:'Colores personalizados',
+    colorGoldLabel:'Color de destaque (meta)', colorTealLabel:'Color de éxito (a tiempo)', colorCoralLabel:'Color de alerta (atrasado)',
+    btnSaveColors:'Guardar colores', btnResetColors:'Restaurar predeterminado', languageTitle:'Idioma',
+    adminNote:'Solo tu cuenta (admin) ve esta sección.', pastPeriodsTitle:'Períodos anteriores',
+    btnClosePeriod:'Cerrar este período', btnExport:'Exportar datos (respaldo)', btnResetAll:'Borrar todos los datos',
+    btnCopy:'Copiar', exportNote:'Copia y guarda este texto en algún lugar (bloc de notas, correo a ti mismo). Si algún día se pierden los datos, solo tienes que pegarlo de vuelta manualmente en los campos.',
+    btnSave:'Guardar', heroLabelGoal:'Falta p/ meta', paceTitle:'Ritmo del período',
+    salesTitle:'Tus ventas', salesDesc:'Actualiza con los valores que aparecen en el sitio de la empresa — sin necesidad de registrar venta por venta.',
+    fieldPaidSales:'Total ventas pagadas', unsavedBadge:'· sin guardar', fieldPaidSalesNote:'Los clientes ya pagaron estas ventas',
+    fieldPendingSales:'Total ventas por pagar', fieldPendingSalesNote:'Ventas cerradas, esperando pago de los clientes',
+    btnUpdateValues:'Actualizar valores', commissionFooterText:'Si todo se paga, tu comisión total es',
+    btnShare:'Compartir resumen', summaryTitle:'Resumen del período',
+    statPaidLabel:'Pagado', statPendingLabel:'Por pagar', statCommissionLabel:'Comisión garantizada', statCommissionPendingLabel:'Comisión por recibir',
+    statWalletLabel:'Total en cartera', statDaysLeftLabel:'Días de trabajo restantes', statProjectionLabel:'Proyección de cierre',
+    evolutionTitle:'Evolución del período', btnShow:'Mostrar', btnHide:'Ocultar',
+    evolutionDesc:'Línea punteada: ritmo ideal para alcanzar tu meta (solo avanza en días trabajados). Línea sólida dorada: tu total pagado acumulado, registrado cada vez que actualizas los valores arriba.',
+    emptyHintText:'¿Primera vez aquí? Define tu meta en <b>"Configuración"</b> y actualiza tus valores en <b>"Tus ventas"</b>, aquí abajo, para empezar a hacer seguimiento.',
+    shareOfGoal:'de la meta', shareRealizedLabel:'Realizado', shareGoalLabel:'Meta',
+    btnDownloadImage:'Descargar imagen', btnCopyText:'Copiar texto', btnClose:'Cerrar',
+    periodLabel:'Período', commissionLabel:'Comisión', goalMetLabel:'¡Meta cumplida!',
+    myGoalLine:'Mi meta', paidSoFarLine:'Ya pagado', requiredMinLabel:'Mínimo exigido por la empresa',
+    minMetSuffix:'ya alcanzado', payToday:'A tiempo', behindPace:'Atrás del ritmo',
+    idealToday:'Ideal', realizedLabel:'Realizado', lastUpdateLabel:'Última actualización', neverUpdated:'Aún sin actualización registrada',
+    goalMetLong:'Ya garantizaste tu meta en este período. 👏', dailyPaceNeed:'Para mantener el ritmo, necesitas vender', perDayWorked:'por día en los', workDaysLeft:'día(s) de trabajo restantes.',
+    avgPaceIs:'Tu ritmo promedio actual es de', perDayWorkedShort:'/día trabajado (', daysElapsed:'día(s) transcurridos).',
+    metaBatida:'meta cumplida', metaNaoBatida:'no alcanzada', noHistoryYet:'Aún no hay historial suficiente para dibujar la evolución — actualiza tus valores en días diferentes y esta curva se irá formando sola.',
+    vsLastPeriod:'vs. período anterior',
+  },
+  en: {
+    eyebrow:'Commission tracking', title:'Sales Dashboard', btnSettings:'Settings',
+    legendLate:'Behind', legendWarn:'Attention', legendPace:'On pace', legendDone:'Goal reached',
+    tabGeral:'General', tabTemas:'Themes', tabUsuarios:'Users', tabDados:'Data', tabConta:'Account', btnViewAll:'View all', btnCompactMode:'Compact mode',
+    fieldMyGoal:'My goal ($)', fieldRequiredGoal:'Goal required by the company ($)', fieldRequiredGoalNote:'Fixed — for reference only.',
+    fieldCommission:'Commission', fieldCommissionNote:'Changing this recalculates the whole history with the new rate — the old rate is not kept.',
+    fieldPeriodStart:'Period start', fieldPeriodEnd:'Period end',
+    calendarTitle:'Period — working days', calendarDesc:'Click a day to mark it as not worked (day off, absence, weekend). Those days are removed from the daily pace calculation.',
+    btnMarkWeekends:'Mark Saturdays and Sundays as off', calLegendWork:'Worked', calLegendOff:'Not worked (click to undo)',
+    themePresetsTitle:'Ready-made themes', customColorsTitle:'Custom colors',
+    colorGoldLabel:'Highlight color (goal)', colorTealLabel:'Success color (on pace)', colorCoralLabel:'Alert color (behind)',
+    btnSaveColors:'Save colors', btnResetColors:'Restore default', languageTitle:'Language',
+    adminNote:'Only your account (admin) sees this section.', pastPeriodsTitle:'Past periods',
+    btnClosePeriod:'Close this period', btnExport:'Export data (backup)', btnResetAll:'Delete all data',
+    btnCopy:'Copy', exportNote:'Copy and keep this text somewhere (notes app, email to yourself). If this data is ever lost, just paste it back into the fields manually.',
+    btnSave:'Save', heroLabelGoal:'Left for goal', paceTitle:'Period pace',
+    salesTitle:'Your sales', salesDesc:'Update with the values shown on the company site — no need to log sale by sale.',
+    fieldPaidSales:'Total paid sales', unsavedBadge:'· unsaved', fieldPaidSalesNote:'Customers have already paid these sales',
+    fieldPendingSales:'Total pending sales', fieldPendingSalesNote:'Closed sales, awaiting customer payment',
+    btnUpdateValues:'Update values', commissionFooterText:'If everything gets paid, your total commission is',
+    btnShare:'Share summary', summaryTitle:'Period summary',
+    statPaidLabel:'Paid', statPendingLabel:'Pending', statCommissionLabel:'Guaranteed commission', statCommissionPendingLabel:'Pending commission',
+    statWalletLabel:'Total in pipeline', statDaysLeftLabel:'Working days left', statProjectionLabel:'Closing projection',
+    evolutionTitle:'Period evolution', btnShow:'Show', btnHide:'Hide',
+    evolutionDesc:'Dashed line: ideal pace to reach your goal (only moves on working days). Solid gold line: your accumulated paid total, logged every time you update the values above.',
+    emptyHintText:'First time here? Set your goal in <b>"Settings"</b> and update your values in <b>"Your sales"</b>, below, to start tracking.',
+    shareOfGoal:'of goal', shareRealizedLabel:'Realized', shareGoalLabel:'Goal',
+    btnDownloadImage:'Download image', btnCopyText:'Copy text', btnClose:'Close',
+    periodLabel:'Period', commissionLabel:'Commission', goalMetLabel:'Goal reached!',
+    myGoalLine:'My goal', paidSoFarLine:'Paid so far', requiredMinLabel:'Minimum required by the company',
+    minMetSuffix:'already met', payToday:'On pace', behindPace:'Behind pace',
+    idealToday:'Ideal', realizedLabel:'Realized', lastUpdateLabel:'Last update', neverUpdated:'No update recorded yet',
+    goalMetLong:"You've already secured your goal this period. 👏", dailyPaceNeed:'To keep pace, you need to sell', perDayWorked:'per day over the', workDaysLeft:'remaining working day(s).',
+    avgPaceIs:'Your current average pace is', perDayWorkedShort:'/worked day (', daysElapsed:'day(s) elapsed).',
+    metaBatida:'goal met', metaNaoBatida:'not met', noHistoryYet:"There isn't enough history yet to draw the evolution — update your values on different days and this curve will build itself.",
+    vsLastPeriod:'vs. previous period', noPeriodsYet:'No period closed yet.', accumulatedTotal:'Accumulated total', inCommissionLabel:'in commission, over', periodsClosedLabel:'closed period(s).', goalMetShort:'Goal reached this period!', leftToGoal:'Left', toReachGoal:'to reach the goal', storageNoteClaude:'Automatically saved here in Claude — open this same conversation on any device to see the same data.', storageNoteFirebase:'Saved in the cloud (Firebase) — access from any device with the same Google account.',
+  }
+};
+
+function t(key){
+  const lang = (config && config.language) || 'pt';
+  return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) || TRANSLATIONS.pt[key] || key;
+}
+
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if(val.includes('<b>')) el.innerHTML = val; else el.textContent = val;
+  });
+}
+
+async function applyLanguage(lang){
+  config.language = lang;
+  document.getElementById('langSelect').value = lang;
+  const settingsSel = document.getElementById('langSelectSettings');
+  if(settingsSel) settingsSel.value = lang;
+  applyStaticTranslations();
+  renderThemeControls();
+  render();
+  await saveConfig();
+}
+
+function switchTab(tabName){
+  document.querySelectorAll('#settingsTabs .tab-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+  const panels = { geral:'tabPanelGeral', temas:'tabPanelTemas', usuarios:'tabPanelUsuarios', dados:'tabPanelDados', conta:'tabPanelConta' };
+  Object.values(panels).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  const target = document.getElementById(panels[tabName]);
+  if(target) target.style.display = 'block';
+}
+
+const THEME_PRESETS = [
+  { key:'ouroVerde',  name:{pt:'Ouro & Verde',        es:'Oro & Verde',        en:'Gold & Green'},      gold:'#D4AF37', teal:'#3DDC97', coral:'#FF6B5E' },
+  { key:'verdeNoite', name:{pt:'Verde Noturno',        es:'Verde Nocturno',     en:'Night Green'},       gold:'#34D399', teal:'#10B981', coral:'#F87171' },
+  { key:'vermelhoExec',name:{pt:'Vermelho Executivo', es:'Rojo Ejecutivo',     en:'Executive Red'},     gold:'#E63946', teal:'#52B788', coral:'#FFB703' },
+  { key:'pretoBranco',name:{pt:'Preto & Branco',       es:'Blanco & Negro',    en:'Black & White'},     gold:'#F1F1F1', teal:'#ADB5BD', coral:'#FF6B6B' },
+  { key:'begeElegante',name:{pt:'Bege Elegante',       es:'Beige Elegante',    en:'Elegant Beige'},     gold:'#C9A876', teal:'#8FBC8F', coral:'#CD5C5C' },
+  { key:'cinzaUrbano',name:{pt:'Cinza Urbano',         es:'Gris Urbano',       en:'Urban Gray'},        gold:'#9CA3AF', teal:'#4ADE80', coral:'#F472B6' },
+];
+
+function themeSwatchBg(preset){
+  return `linear-gradient(135deg, ${preset.gold} 0% 34%, ${preset.teal} 34% 67%, ${preset.coral} 67% 100%)`;
+}
+
+function isPresetActive(preset){
+  const c = config.colors || DEFAULT_COLORS;
+  return c.gold?.toLowerCase()===preset.gold.toLowerCase() && c.teal?.toLowerCase()===preset.teal.toLowerCase() && c.coral?.toLowerCase()===preset.coral.toLowerCase();
+}
+
+async function applyPreset(preset){
+  config.colors = { gold: preset.gold, teal: preset.teal, coral: preset.coral };
+  applyColors(config.colors);
+  renderThemeControls();
+  const ok = await saveConfig();
+  showStatus(ok ? 'Tema aplicado.' : 'Tema aplicado na tela, mas não salvo no servidor.', !ok);
+}
+
+function renderThemeControls(){
+  const lang = config.language || 'pt';
+  const quick = document.getElementById('themeQuick');
+  const list = document.getElementById('themePresetsList');
+  if(quick){
+    quick.innerHTML = '';
+    THEME_PRESETS.forEach(preset=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.background = themeSwatchBg(preset);
+      btn.title = preset.name[lang] || preset.name.pt;
+      if(isPresetActive(preset)) btn.classList.add('active');
+      btn.onclick = () => applyPreset(preset);
+      quick.appendChild(btn);
+    });
+  }
+  if(list){
+    list.innerHTML = '';
+    THEME_PRESETS.forEach(preset=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'theme-preset-btn' + (isPresetActive(preset) ? ' active' : '');
+      btn.innerHTML = `<span class="theme-preset-swatch" style="background:${themeSwatchBg(preset)}"></span><span>${preset.name[lang] || preset.name.pt}</span>`;
+      btn.onclick = () => applyPreset(preset);
+      list.appendChild(btn);
+    });
+  }
+  if(document.getElementById('colorGold')){
+    const colors = config.colors || DEFAULT_COLORS;
+    document.getElementById('colorGold').value = colors.gold;
+    document.getElementById('colorTeal').value = colors.teal;
+    document.getElementById('colorCoral').value = colors.coral;
+  }
+}
 function applyColors(colors){
   const c = colors || DEFAULT_COLORS;
   document.documentElement.style.setProperty('--gold', c.gold || DEFAULT_COLORS.gold);
@@ -873,12 +924,13 @@ async function loadAll(){
   }catch(e){ config = null; }
   if(!config){
     const p = defaultPeriod();
-    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS} };
+    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS}, language: 'pt' };
     await saveConfig();
   } else {
     if(config.metaPessoal === undefined) config.metaPessoal = config.meta || META_OFICIAL;
     if(!config.excludedDays) config.excludedDays = [];
     if(!config.colors) config.colors = {...DEFAULT_COLORS};
+    if(!config.language) config.language = 'pt';
   }
   try{
     const t = await window.storage.get('sales-totals');
@@ -965,44 +1017,42 @@ function computeMetrics(){
 
 function render(){
   const m = computeMetrics();
-  document.title = `${Math.round(m.percentual)}% · Painel de Vendas`;
+  document.title = `${Math.round(m.percentual)}% · ${t('title')}`;
   applyColors(config.colors);
-  const colors = config.colors || DEFAULT_COLORS;
-  document.getElementById('colorGold').value = colors.gold;
-  document.getElementById('colorTeal').value = colors.teal;
-  document.getElementById('colorCoral').value = colors.coral;
+  renderThemeControls();
+  applyStaticTranslations();
 
   document.getElementById('periodLine').innerHTML =
-    `Período apurado: <b>${fmtDisplayDate(config.periodStart)} a ${fmtDisplayDate(config.periodEnd)}</b> · Comissão ${config.comissaoPct}%` +
-    ` <button id="toggleSettingsBtn2" type="button">Definir minha meta</button>` +
-    ` <button id="toggleCompactBtn" type="button">${document.body.classList.contains('compact-mode') ? 'Ver tudo' : 'Modo compacto'}</button>`;
+    `${t('periodLabel')}: <b>${fmtDisplayDate(config.periodStart)} ${config.language==='en'?'to':'a'} ${fmtDisplayDate(config.periodEnd)}</b> · ${t('commissionLabel')} ${config.comissaoPct}%` +
+    ` <button id="toggleSettingsBtn2" type="button">${t('btnSettings')}</button>` +
+    ` <button id="toggleCompactBtn" type="button">${document.body.classList.contains('compact-mode') ? t('btnViewAll') : t('btnCompactMode')}</button>`;
   document.getElementById('toggleSettingsBtn2').onclick = toggleSettings;
   document.getElementById('toggleCompactBtn').onclick = () => {
     document.body.classList.toggle('compact-mode');
     render();
   };
 
-  document.getElementById('heroFalta').textContent = m.metaBatida ? 'Meta batida! 🎉' : fmtBRLCompact(m.falta);
-  document.getElementById('heroSub').textContent = `Minha meta: ${fmtBRL(m.meta)} · Já pago: ${fmtBRL(totals.pago)}`;
+  document.getElementById('heroFalta').textContent = m.metaBatida ? t('goalMetLabel')+' 🎉' : fmtBRLCompact(m.falta);
+  document.getElementById('heroSub').textContent = `${t('myGoalLine')}: ${fmtBRL(m.meta)} · ${t('paidSoFarLine')}: ${fmtBRL(totals.pago)}`;
   const comparativo = document.getElementById('comparativoAnterior');
   if(periodosHistorico.length){
     const anterior = periodosHistorico[periodosHistorico.length-1];
     if(anterior.totalPago > 0){
       const variacao = ((totals.pago - anterior.totalPago) / anterior.totalPago) * 100;
       const sinal = variacao >= 0 ? '+' : '';
-      comparativo.textContent = `${sinal}${variacao.toFixed(0)}% vs. período anterior (${fmtBRL(anterior.totalPago)})`;
+      comparativo.textContent = `${sinal}${variacao.toFixed(0)}% ${t('vsLastPeriod')} (${fmtBRL(anterior.totalPago)})`;
       comparativo.style.color = variacao >= 0 ? 'var(--teal)' : 'var(--coral)';
       comparativo.style.display = 'block';
     } else { comparativo.style.display = 'none'; }
   } else { comparativo.style.display = 'none'; }
   const minNote = document.getElementById('minNote');
-  minNote.textContent = m.oficialBatida ? `✓ Mínimo exigido pela empresa (${fmtBRL(META_OFICIAL)}) já batido` : `Mínimo exigido pela empresa: ${fmtBRL(META_OFICIAL)}`;
+  minNote.textContent = m.oficialBatida ? `✓ ${t('requiredMinLabel')} (${fmtBRL(META_OFICIAL)}) ${t('minMetSuffix')}` : `${t('requiredMinLabel')}: ${fmtBRL(META_OFICIAL)}`;
   minNote.className = 'min-note' + (m.oficialBatida ? ' met' : '');
 
   const pill = document.getElementById('pacePill');
-  if(m.metaBatida){ pill.className='pill done'; pill.textContent='Meta batida'; }
-  else if(m.onPace){ pill.className='pill ahead'; pill.textContent='No ritmo'; }
-  else { pill.className='pill behind'; pill.textContent='Atrás do ritmo'; }
+  if(m.metaBatida){ pill.className='pill done'; pill.textContent=t('goalMetLabel').replace('!',''); }
+  else if(m.onPace){ pill.className='pill ahead'; pill.textContent=t('payToday'); }
+  else { pill.className='pill behind'; pill.textContent=t('behindPace'); }
 
   document.getElementById('gaugeFill').style.width = m.percentual+'%';
   const ratio = m.metaHojeLinear>0 ? (totals.pago/m.metaHojeLinear) : (totals.pago>0?1.25:1);
@@ -1032,15 +1082,15 @@ function render(){
 
   const idealTip = document.getElementById('gaugeMarkerTip');
   const realizadoTip = document.getElementById('gaugeCurrentTip');
-  idealTip.textContent = `Ideal: ${fmtBRLShort(m.metaHojeLinear)}`;
-  realizadoTip.textContent = `Realizado: ${fmtBRLShort(totals.pago)}`;
+  idealTip.textContent = `${t('idealToday')}: ${fmtBRLShort(m.metaHojeLinear)}`;
+  realizadoTip.textContent = `${t('realizedLabel')}: ${fmtBRLShort(totals.pago)}`;
   const trackWidth = document.getElementById('gaugeTrack').getBoundingClientRect().width;
   positionTip(idealTip, trackWidth, markerPct);
   positionTip(realizadoTip, trackWidth, m.percentual);
 
-  document.getElementById('ritmoNecessario').innerHTML = m.metaBatida ? 'Você já garantiu a sua meta neste período. 👏' :
-    `Para manter o ritmo, você precisa vender <b>${fmtBRL(m.ritmoNecessarioDiario)}</b> por dia nos ${m.diasRestantes} dia(s) de trabalho restantes.`;
-  document.getElementById('ritmoAtual').innerHTML = `Seu ritmo médio atual é de <b>${fmtBRL(m.ritmoAtualDiario)}</b>/dia trabalhado (${m.diasTranscorridos} dia(s) decorridos).`;
+  document.getElementById('ritmoNecessario').innerHTML = m.metaBatida ? t('goalMetLong') :
+    `${t('dailyPaceNeed')} <b>${fmtBRL(m.ritmoNecessarioDiario)}</b> ${t('perDayWorked')} ${m.diasRestantes} ${t('workDaysLeft')}`;
+  document.getElementById('ritmoAtual').innerHTML = `${t('avgPaceIs')} <b>${fmtBRL(m.ritmoAtualDiario)}</b>${t('perDayWorkedShort')}${m.diasTranscorridos} ${t('daysElapsed')}`;
 
   document.getElementById('statPago').textContent = fmtBRL(totals.pago);
   document.getElementById('statAPagar').textContent = fmtBRL(totals.aPagar);
@@ -1074,7 +1124,7 @@ function render(){
   document.getElementById('inAPagar').value = formatMoneyValue(totals.aPagar);
 
   const lastDate = history.length ? history.map(h=>h.date).sort().slice(-1)[0] : null;
-  document.getElementById('lastUpdateNote').textContent = lastDate ? `Última atualização: ${fmtDisplayDate(lastDate)}` : 'Ainda sem atualização registrada';
+  document.getElementById('lastUpdateNote').textContent = lastDate ? `${t('lastUpdateLabel')}: ${fmtDisplayDate(lastDate)}` : t('neverUpdated');
 
   document.getElementById('emptyHint').style.display =
     (totals.pago===0 && totals.aPagar===0 && history.length===0) ? 'block' : 'none';
@@ -1086,15 +1136,15 @@ function render(){
 
 function renderPeriodosHistorico(){
   const el = document.getElementById('periodosList');
-  if(!periodosHistorico.length){ el.innerHTML = '<p class="field-note">Nenhum período encerrado ainda.</p>'; return; }
+  if(!periodosHistorico.length){ el.innerHTML = `<p class="field-note">${t('noPeriodsYet')}</p>`; return; }
   const totalComissao = periodosHistorico.reduce((a,p)=>a+p.comissaoGanha,0);
-  const resumo = `<p class="field-note" style="margin-bottom:8px;">Total acumulado: <b style="color:var(--gold);">${fmtBRL(totalComissao)}</b> em comissão, em ${periodosHistorico.length} período(s) encerrado(s).</p>`;
+  const resumo = `<p class="field-note" style="margin-bottom:8px;">${t('accumulatedTotal')}: <b style="color:var(--gold);">${fmtBRL(totalComissao)}</b> ${t('inCommissionLabel')} ${periodosHistorico.length} ${t('periodsClosedLabel')}</p>`;
   const linhas = periodosHistorico.slice().reverse().map((p, i)=>{
     const ok = p.metaBatida;
     const idxReal = periodosHistorico.length - 1 - i;
     return `<div class="periodo-row${i===0?' recent':''}">
       <span>${fmtDisplayDate(p.periodStart)}–${fmtDisplayDate(p.periodEnd)}</span>
-      <span class="valores">${fmtBRL(p.totalPago)} <span class="status ${ok?'ok':'no'}">${ok?'✓ meta batida':'não bateu'}</span>
+      <span class="valores">${fmtBRL(p.totalPago)} <span class="status ${ok?'ok':'no'}">${ok?'✓ '+t('metaBatida'):t('metaNaoBatida')}</span>
         <button class="del-periodo" data-idx="${idxReal}" type="button" title="Excluir este registro" aria-label="Excluir este período">✕</button>
       </span>
     </div>`;
@@ -1220,7 +1270,7 @@ function renderChart(m){
   if(pointCount < 2){
     const overlay = document.createElement('div');
     overlay.className = 'chart-empty';
-    overlay.textContent = 'Ainda não há histórico suficiente pra desenhar a evolução — atualize seus valores em dias diferentes e essa curva vai se formando sozinha.';
+    overlay.textContent = t('noHistoryYet');
     document.getElementById('chartWrap').appendChild(overlay);
   }
 
@@ -1264,8 +1314,8 @@ function openShareModal(){
   document.getElementById('shareRealizado').textContent = fmtBRLCompact(totals.pago);
   document.getElementById('shareMeta').textContent = fmtBRLCompact(m.meta);
   document.getElementById('shareFalta').innerHTML = m.metaBatida
-    ? '🎉 Meta batida neste período!'
-    : `Faltam <b>${fmtBRLCompact(m.falta)}</b> pra bater a meta`;
+    ? '🎉 ' + t('goalMetShort')
+    : `${t('leftToGoal')} <b>${fmtBRLCompact(m.falta)}</b> ${t('toReachGoal')}`;
   document.getElementById('shareData').textContent = new Date().toLocaleDateString('pt-BR');
 
   const ratio = m.metaHojeLinear>0 ? (totals.pago/m.metaHojeLinear) : (totals.pago>0?1.25:1);
@@ -1284,7 +1334,7 @@ function openShareModal(){
   ringTime.style.strokeDashoffset = Ct * (1 - pctTempo/100);
 
   const pill = document.getElementById('sharePacePill');
-  pill.textContent = m.metaBatida ? 'Meta batida' : (m.onPace ? 'No ritmo' : 'Atrás do ritmo');
+  pill.textContent = m.metaBatida ? t('goalMetLabel').replace('!','') : (m.onPace ? t('payToday') : t('behindPace'));
   pill.style.background = toRgba(statusColor, 0.16);
   pill.style.color = statusColor;
 
@@ -1529,7 +1579,7 @@ async function saveSettings(){
   try{
     const metaPessoal = parseMoneyValue(document.getElementById('inMeta').value);
     const comissaoPct = parseFloat(document.getElementById('inComissao').value) || 0;
-    config = { metaPessoal, comissaoPct, periodStart, periodEnd, excludedDays: config.excludedDays||[] };
+    config = { metaPessoal, comissaoPct, periodStart, periodEnd, excludedDays: config.excludedDays||[], colors: config.colors||{...DEFAULT_COLORS}, language: config.language||'pt' };
     ok = await saveConfig();
     render();
   }catch(e){
@@ -1570,7 +1620,7 @@ async function resetAll(){
     await window.storage.delete('sales-totals');
     await window.storage.delete('sales-history');
     const p = defaultPeriod();
-    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS} };
+    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS}, language: config?.language || 'pt' };
     totals = { pago: 0, aPagar: 0 };
     history = [];
     await saveConfig(); await saveTotals(); await saveHistory();
@@ -1586,8 +1636,12 @@ async function resetAll(){
 async function init(){
   document.getElementById('toggleSettingsBtn').onclick = toggleSettings;
   document.getElementById('marcarFinsDeSemanaBtn').onclick = marcarFinsDeSemana;
+  document.querySelectorAll('#settingsTabs .tab-btn').forEach(btn=>{
+    btn.onclick = () => switchTab(btn.dataset.tab);
+  });
+  document.getElementById('langSelect').onchange = (e) => applyLanguage(e.target.value);
+  document.getElementById('langSelectSettings').onchange = (e) => applyLanguage(e.target.value);
   document.getElementById('saveColorsBtn').onclick = saveColors;
-  document.getElementById('addAllowedEmailBtn').onclick = addAllowedUser;
   document.getElementById('resetColorsBtn').onclick = resetColors;
   ['colorGold','colorTeal','colorCoral'].forEach(id=>{
     document.getElementById(id).addEventListener('input', (e)=>{
@@ -1619,54 +1673,14 @@ async function init(){
   [document.getElementById('inPago'), document.getElementById('inAPagar')].forEach(el=>{
     el.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); updateValues(); } });
   });
+
+  await loadAll();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  render();
 }
 
-document.getElementById('googleLoginBtn').onclick = () => {
-  document.getElementById('loginError').textContent = '';
-  signInWithPopup(auth, new GoogleAuthProvider()).catch(e => {
-    console.error('Erro no login', e);
-    document.getElementById('loginError').textContent = 'Não consegui entrar: ' + e.message;
-  });
-};
-document.getElementById('logoutBtn').onclick = () => {
-  if(confirm('Sair da sua conta?')) signOut(auth);
-};
-
-let buttonsAlreadyBound = false;
-
-onAuthStateChanged(auth, async (user) => {
-  if(user){
-    const emailPermitido = await isAllowedEmail(user.email);
-    if(!emailPermitido){
-      document.getElementById('loginError').textContent = 'Esse painel é de uso pessoal — essa conta não tem acesso.';
-      await signOut(auth);
-      return;
-    }
-
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboardRoot').style.display = 'block';
-    document.getElementById('userEmail').textContent = user.email || user.displayName || '';
-    if(!buttonsAlreadyBound){ await init(); buttonsAlreadyBound = true; }
-
-    const adminPanel = document.getElementById('adminPanel');
-    if(user.email === ADMIN_EMAIL){
-      adminPanel.style.display = 'block';
-      loadAllowedUsers();
-    } else {
-      adminPanel.style.display = 'none';
-    }
-
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
-    await loadAll();
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    render();
-  } else {
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboardRoot').style.display = 'none';
-  }
-});
+init();
 </script>
 </body>
 </html>
