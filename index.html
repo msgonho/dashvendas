@@ -33,6 +33,10 @@
   .theme-quick button.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--text);}
   .lang-select{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 8px;font-family:var(--mono);font-size:11px;cursor:pointer;}
   .lang-select-full{width:100%;max-width:260px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:13px;cursor:pointer;}
+  .mode-toggle{background:var(--surface-2);border:1px solid var(--border);border-radius:20px;width:34px;height:26px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .mode-toggle-row{display:flex;gap:10px;}
+  .mode-option{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text-muted);transition:border-color .2s;}
+  .mode-option.active{border-color:var(--gold);color:var(--text);}
 
   .tabs-row{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;}
   .tab-btn{background:none;border:none;color:var(--text-muted);font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
@@ -429,6 +433,7 @@
       <h1 data-i18n="title">Painel de Vendas</h1>
     </div>
     <div class="top-controls">
+      <button id="themeModeToggle" class="mode-toggle" type="button" title="Alternar tema claro/escuro">🌙</button>
       <div class="theme-quick" id="themeQuick" title="Tema de cores"></div>
       <select id="langSelect" class="lang-select" title="Idioma">
         <option value="pt">PT-BR</option>
@@ -492,7 +497,13 @@
     </div>
 
     <div class="tab-panel" id="tabPanelTemas" style="display:none;">
-      <h2 class="section-title" style="margin-top:0;" data-i18n="themePresetsTitle">Temas prontos</h2>
+      <h2 class="section-title" style="margin-top:0;">Modo</h2>
+      <div class="mode-toggle-row">
+        <button class="mode-option" data-mode="dark" type="button">🌙 Escuro</button>
+        <button class="mode-option" data-mode="light" type="button">☀️ Claro</button>
+      </div>
+
+      <h2 class="section-title" style="margin-top:24px;" data-i18n="themePresetsTitle">Temas prontos</h2>
       <div class="theme-presets" id="themePresetsList"></div>
 
       <h2 class="section-title" style="margin-top:24px;" data-i18n="customColorsTitle">Cores personalizadas</h2>
@@ -766,6 +777,16 @@ async function isAllowedEmail(email){
   }catch(e){ console.error('Erro ao checar permissão', e); return false; }
 }
 
+async function recordLogin(email){
+  try{
+    await setDoc(doc(db, 'allowedUsers', email), {
+      lastLogin: new Date().toISOString(),
+      hasLoggedIn: true,
+      displayName: auth.currentUser?.displayName || ''
+    }, { merge: true });
+  }catch(e){ console.error('Erro ao registrar login', e); }
+}
+
 async function loadAllowedUsers(){
   const listEl = document.getElementById('allowedUsersList');
   if(!listEl) return;
@@ -775,9 +796,15 @@ async function loadAllowedUsers(){
     if(snap.empty){ listEl.innerHTML = '<p class="field-note">Nenhum e-mail liberado ainda (além do seu, que é admin).</p>'; return; }
     listEl.innerHTML = '';
     snap.forEach(docSnap=>{
+      const data = docSnap.data();
+      const logou = !!data.hasLoggedIn;
+      const nome = data.displayName ? ` (${data.displayName})` : '';
+      const statusTxt = logou
+        ? `✓ ativo — já logou com Google${data.lastLogin ? ' · último acesso ' + new Date(data.lastLogin).toLocaleDateString('pt-BR') + ' ' + new Date(data.lastLogin).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : ''}`
+        : 'ainda não logou (convite pendente)';
       const row = document.createElement('div');
       row.className = 'periodo-row';
-      row.innerHTML = `<span>${docSnap.id}</span><span class="valores"><button class="del-periodo" type="button" title="Remover acesso">✕</button></span>`;
+      row.innerHTML = `<span>${docSnap.id}${nome}<br><span class="status ${logou?'ok':'no'}" style="font-size:10px;">${statusTxt}</span></span><span class="valores"><button class="del-periodo" type="button" title="Remover acesso">✕</button></span>`;
       row.querySelector('.del-periodo').onclick = () => removeAllowedUser(docSnap.id);
       listEl.appendChild(row);
     });
@@ -822,6 +849,36 @@ let chartInstance = null;
 let isDirty = false;
 const META_OFICIAL = 100000;
 const DEFAULT_COLORS = { gold:'#D4AF37', teal:'#3DDC97', coral:'#FF6B5E' };
+
+const MODE_PALETTES = {
+  dark:  { bg:'#0F1115', surface:'#171B22', surface2:'#1E232C', border:'#2A2F3A', text:'#E9E7E2', textMuted:'#8B93A1' },
+  light: { bg:'#F3F4F6', surface:'#FFFFFF', surface2:'#EEF0F3', border:'#DADFE5', text:'#1A1D23', textMuted:'#5B6270' }
+};
+
+function applyThemeMode(mode){
+  const p = MODE_PALETTES[mode] || MODE_PALETTES.dark;
+  const root = document.documentElement.style;
+  root.setProperty('--bg', p.bg);
+  root.setProperty('--surface', p.surface);
+  root.setProperty('--surface-2', p.surface2);
+  root.setProperty('--border', p.border);
+  root.setProperty('--text', p.text);
+  root.setProperty('--text-muted', p.textMuted);
+  root.setProperty('color-scheme', mode);
+  const toggleBtn = document.getElementById('themeModeToggle');
+  if(toggleBtn) toggleBtn.textContent = mode==='light' ? '☀️' : '🌙';
+  document.querySelectorAll('.mode-option').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  if(chartInstance) renderChart(computeMetrics());
+}
+
+async function setThemeMode(mode){
+  config.themeMode = mode;
+  applyThemeMode(mode);
+  const ok = await saveConfig();
+  showStatus(ok ? 'Modo alterado.' : 'Aplicado na tela, mas não salvo no servidor.', !ok);
+}
 
 const TRANSLATIONS = {
   pt: {
@@ -1145,13 +1202,14 @@ async function loadAll(){
   }catch(e){ config = null; }
   if(!config){
     const p = defaultPeriod();
-    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS}, language: 'pt' };
+    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS}, language: 'pt', themeMode: 'dark' };
     await saveConfig();
   } else {
     if(config.metaPessoal === undefined) config.metaPessoal = config.meta || META_OFICIAL;
     if(!config.excludedDays) config.excludedDays = [];
     if(!config.colors) config.colors = {...DEFAULT_COLORS};
     if(!config.language) config.language = 'pt';
+    if(!config.themeMode) config.themeMode = 'dark';
   }
   try{
     const t = await window.storage.get('sales-totals');
@@ -1240,6 +1298,7 @@ function render(){
   const m = computeMetrics();
   document.title = `${Math.round(m.percentual)}% · ${t('title')}`;
   applyColors(config.colors);
+  applyThemeMode(config.themeMode || 'dark');
   renderThemeControls();
   applyStaticTranslations();
 
@@ -1475,6 +1534,9 @@ function renderChart(m){
   }
   const days = enumerateDays(m.start, m.end);
   const labels = days.map(d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}`);
+  const isLight = (config.themeMode||'dark') === 'light';
+  const chartMuted = isLight ? '#6B7280' : '#8B93A1';
+  const chartGrid = isLight ? '#DADFE5' : '#2A2F3A';
 
   let counter = 0;
   const metaLine = days.map(d=>{
@@ -1506,16 +1568,16 @@ function renderChart(m){
   chartInstance = new Chart(ctx, {
     type:'line',
     data:{ labels, datasets:[
-      { label:'Ritmo ideal (dias trabalhados)', data: metaLine, borderColor:'#8B93A1', borderDash:[5,4], pointRadius:0, borderWidth:1.5, tension:0 },
+      { label:'Ritmo ideal (dias trabalhados)', data: metaLine, borderColor:chartMuted, borderDash:[5,4], pointRadius:0, borderWidth:1.5, tension:0 },
       { label:'Pago (acumulado)', data: actualLine, borderColor:'#D4AF37', backgroundColor:'rgba(212,175,55,0.12)', fill:true, pointRadius:3, borderWidth:2.5, tension:.15, spanGaps:true }
     ]},
     options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{intersect:false, mode:'index'},
-      plugins:{ legend:{labels:{color:'#8B93A1', font:{family:'monospace', size:11}}} },
+      plugins:{ legend:{labels:{color:chartMuted, font:{family:'monospace', size:11}}} },
       scales:{
-        x:{ ticks:{color:'#8B93A1', font:{size:10}}, grid:{color:'#2A2F3A'} },
-        y:{ ticks:{color:'#8B93A1', font:{size:10}, callback:(v)=>'R$'+(v/1000)+'k' }, grid:{color:'#2A2F3A'} }
+        x:{ ticks:{color:chartMuted, font:{size:10}}, grid:{color:chartGrid} },
+        y:{ ticks:{color:chartMuted, font:{size:10}, callback:(v)=>'R$'+(v/1000)+'k' }, grid:{color:chartGrid} }
       }
     }
   });
@@ -1806,7 +1868,7 @@ async function saveSettings(){
   try{
     const metaPessoal = parseMoneyValue(document.getElementById('inMeta').value);
     const comissaoPct = parseFloat(document.getElementById('inComissao').value) || 0;
-    config = { metaPessoal, comissaoPct, periodStart, periodEnd, excludedDays: config.excludedDays||[], colors: config.colors||{...DEFAULT_COLORS}, language: config.language||'pt' };
+    config = { metaPessoal, comissaoPct, periodStart, periodEnd, excludedDays: config.excludedDays||[], colors: config.colors||{...DEFAULT_COLORS}, language: config.language||'pt', themeMode: config.themeMode||'dark' };
     ok = await saveConfig();
     render();
   }catch(e){
@@ -1847,7 +1909,7 @@ async function resetAll(){
     await window.storage.delete('sales-totals');
     await window.storage.delete('sales-history');
     const p = defaultPeriod();
-    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS}, language: config?.language || 'pt' };
+    config = { metaPessoal: META_OFICIAL, comissaoPct: 10, periodStart: p.start, periodEnd: p.end, excludedDays: [], colors: {...DEFAULT_COLORS}, language: config?.language || 'pt', themeMode: config?.themeMode || 'dark' };
     totals = { pago: 0, aPagar: 0 };
     history = [];
     await saveConfig(); await saveTotals(); await saveHistory();
@@ -1868,6 +1930,12 @@ async function init(){
   });
   document.getElementById('langSelect').onchange = (e) => applyLanguage(e.target.value);
   document.getElementById('langSelectSettings').onchange = (e) => applyLanguage(e.target.value);
+  document.getElementById('themeModeToggle').onclick = () => {
+    setThemeMode((config.themeMode||'dark') === 'dark' ? 'light' : 'dark');
+  };
+  document.querySelectorAll('.mode-option').forEach(btn=>{
+    btn.onclick = () => setThemeMode(btn.dataset.mode);
+  });
   document.getElementById('saveColorsBtn').onclick = saveColors;
   document.getElementById('resetColorsBtn').onclick = resetColors;
   ['colorGold','colorTeal','colorCoral'].forEach(id=>{
@@ -1944,6 +2012,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     const isAdmin = (user.email||'').trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
+    if(!isAdmin) recordLogin(user.email);
     document.getElementById('tabUsuariosBtn').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('tabContaBtn').style.display = 'inline-block';
     if(isAdmin) loadAllowedUsers();
