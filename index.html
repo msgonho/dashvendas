@@ -759,7 +759,7 @@ window.storage = {
 };
 
 async function isAllowedEmail(email){
-  if(email === ADMIN_EMAIL) return true;
+  if((email||'').trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase()) return true;
   try{
     const snap = await getDoc(doc(db, 'allowedUsers', email));
     return snap.exists();
@@ -1934,7 +1934,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('contaEmailDisplay').textContent = user.email || user.displayName || '';
     if(!buttonsAlreadyBound){ await init(); buttonsAlreadyBound = true; }
 
-    const isAdmin = user.email === ADMIN_EMAIL;
+    const isAdmin = (user.email||'').trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
     document.getElementById('tabUsuariosBtn').style.display = isAdmin ? 'inline-block' : 'none';
     document.getElementById('tabContaBtn').style.display = 'inline-block';
     if(isAdmin) loadAllowedUsers();
